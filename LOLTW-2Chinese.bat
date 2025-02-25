@@ -7,7 +7,7 @@ set filepath=C:\ProgramData\Riot Games\Metadata\league_of_legends.live
 set filename=C:\ProgramData\Riot Games\Metadata\league_of_legends.live\league_of_legends.live.product_settings.yaml
 set output_file=D:\league_of_legends.live.product_settings.yaml
 
-set /p user_input=请选择需要汉化的语言(0.繁体中文，1.日语，2.韩文，3.英文):
+set /p user_input=请选择需要汉化的语言或者地区(0.繁体中文，1.日语，2.韩文，3.英文，4.欧服，5.新加坡，6.马来西亚):
 set search_line=    locale: "zh_TW"
 if "%user_input%"=="1" (
     set search_line=    locale: "ja_JP"
@@ -17,6 +17,15 @@ if "%user_input%"=="2" (
 )
 if "%user_input%"=="3" (
     set search_line=    locale: "en_US"
+)
+if "%user_input%"=="4" (
+    set search_line=    locale: "en_GB"
+)
+if "%user_input%"=="5" (
+    set search_line=    locale: "en_SG"
+)
+if "%user_input%"=="6" (
+    set search_line=    locale: "zh_MY"
 )
 echo %search_line%
 set replace_line=    locale: "zh_CN"
