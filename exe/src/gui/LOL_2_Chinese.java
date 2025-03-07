@@ -11,6 +11,7 @@ public class LOL_2_Chinese extends JFrame {
 
     private final static String PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.live\\";
     private final static String FILENAME = "league_of_legends.live.product_settings.yaml";
+    private JCheckBox checkBox;
 
     public static void main(String[] args) {
         new LOL_2_Chinese();
@@ -29,9 +30,17 @@ public class LOL_2_Chinese extends JFrame {
             this.setLocation(x, y); // 窗口对齐右下角
 
             JPanel panel = new JPanel();
+            JLabel[] comboBoxLabel = {
+                    new JLabel("是否有D盘，没有请勾选："),
+                    new JLabel("选择语言：")
+            };
             panel.setLayout(new GridBagLayout()); // 使用 GridBagLayout 使下拉框居中
-
+            checkBox = new JCheckBox();
             JComboBox<String> comboBox = getStringJComboBox();
+            panel.add(comboBoxLabel[0]);
+            panel.add(checkBox);
+
+            panel.add(comboBoxLabel[1]);
             panel.add(comboBox);
 
             this.add(panel);
@@ -66,8 +75,16 @@ public class LOL_2_Chinese extends JFrame {
      * @param lang: 语言
      */
     public void changeLanguage(String lang) {
+        String path = "";
         try (BufferedReader reader = new BufferedReader(new FileReader(PATHNAME + FILENAME))) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("D:\\" + FILENAME));
+            if (checkBox.isSelected()) {
+                System.out.println("No D");
+                path = "C:\\ProgramData\\Riot Games\\Metadata\\";
+            } else {
+                System.out.println("D");
+                path = "D:\\";
+            }
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path + FILENAME));
             String line, languageStr, language;
             while ( (line = reader.readLine()) != null) {
                 if (line.split(":")[0].trim().equals("locale")) {
@@ -87,7 +104,7 @@ public class LOL_2_Chinese extends JFrame {
 
         try {
             // 移动文件
-            Path source = Path.of("D:\\" + FILENAME);
+            Path source = Path.of(path + FILENAME);
             Path target = Path.of(PATHNAME + FILENAME);
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {

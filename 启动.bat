@@ -1,0 +1,1 @@
+.\\runtime\\bin\\java -jar .\\app\\exe.jar
