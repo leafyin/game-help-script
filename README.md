@@ -4,6 +4,15 @@
 
 * 英雄联盟外服语言切换工具(java客户端)，编译需要JAVA21，版本52，建议openjdk21即可
 
+***
+
+## 注意事项
+* Windows用户不必在意
+* MAC用户请打开Terminal执行`open /Applications/League\ of\ Legends.app --args --locale=zh_CN`这个命令就可以打开游戏并汉化
+可以每次都使用该方法进行启动游戏
+
+***
+
 ## 支持切换的语言
 * 简体中文 
   阿拉伯语（阿联酋）
