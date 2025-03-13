@@ -15,6 +15,7 @@ public class LOL_2_Chinese extends JFrame {
     private JTextField nowLang;
 
     private final static String[] LANGUAGES = {
+            "简体中文",
             "阿拉伯语（阿联酋）",
             "捷克语",
             "德语",
@@ -40,7 +41,7 @@ public class LOL_2_Chinese extends JFrame {
             "土耳其语",
             "越南语",
             "简体中文（马来西亚）",
-            "繁体中文（台湾）"
+            "繁体中文"
     };
 
     public static void main(String[] args) {
@@ -98,6 +99,10 @@ public class LOL_2_Chinese extends JFrame {
         });
     }
 
+    /**
+     * 语言选择下拉框
+     * @return comboBox
+     */
     private JComboBox<String> getStringJComboBox() {
         JComboBox<String> comboBox = new JComboBox<>(LANGUAGES);
         comboBox.addActionListener(e -> {
@@ -109,6 +114,10 @@ public class LOL_2_Chinese extends JFrame {
         return comboBox;
     }
 
+    /**
+     * 当前语言名称（中文）
+     * @return 语言名称（中文）
+     */
     public String currentLanguage() {
         String line, languageStr, lang = "";
         try (BufferedReader reader = new BufferedReader(new FileReader(PATHNAME + FILENAME))) {
@@ -167,8 +176,14 @@ public class LOL_2_Chinese extends JFrame {
         nowLang.setText(currentLanguage());
     }
 
+    /**
+     * 语言代码TO中文语言名称
+     * @param languageCode 语言代码
+     * @return 语言名称（中文）
+     */
     public String languageName(String languageCode){
         return switch (languageCode) {
+            case "zh_CN" -> "简体中文";
             case "ar_AE" -> "阿拉伯语（阿联酋）";
             case "cs_CZ" -> "捷克语";
             case "de_DE" -> "德语";
@@ -194,13 +209,19 @@ public class LOL_2_Chinese extends JFrame {
             case "tr_TR" -> "土耳其语";
             case "vi_VN" -> "越南语";
             case "zh_MY" -> "简体中文（马来西亚）";
-            case "zh_TW" -> "繁体中文（台湾）";
+            case "zh_TW" -> "繁体中文";
             default -> "未知语言";
         };
     }
 
+    /**
+     * 中文语言名称TO语言代码
+     * @param languageName 语言名称（中文）
+     * @return 语言代码
+     */
     public String languageCode(String languageName) {
         return switch (languageName) {
+            case "简体中文" -> "zh_CN";
             case "阿拉伯语（阿联酋）" -> "ar_AE";
             case "捷克语" -> "cs_CZ";
             case "德语" -> "de_DE";
@@ -226,7 +247,7 @@ public class LOL_2_Chinese extends JFrame {
             case "土耳其语" -> "tr_TR";
             case "越南语" -> "vi_VN";
             case "简体中文（马来西亚）" -> "zh_MY";
-            case "繁体中文（台湾）" -> "zh_TW";
+            case "繁体中文" -> "zh_TW";
             default -> "未知语言";
         };
     }
