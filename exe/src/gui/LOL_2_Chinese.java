@@ -154,7 +154,7 @@ public class LOL_2_Chinese extends JFrame {
             filename = FILENAME;
         } else {
             pathname = PBE_PATHNAME;
-            filename = PBE_PATHNAME;
+            filename = PBE_FILENAME;
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(pathname + filename))) {
             if (checkBox.isSelected()) {
