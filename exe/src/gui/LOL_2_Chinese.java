@@ -6,11 +6,15 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.logging.Logger;
 
 public class LOL_2_Chinese extends JFrame {
 
+    private static final Logger logger = Logger.getLogger(LOL_2_Chinese.class.getName());
     private final static String PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.live\\";
+    private final static String PBE_PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.pbe\\";
     private final static String FILENAME = "league_of_legends.live.product_settings.yaml";
+    private final static String PBE_FILENAME = "league_of_legends.pbe.product_settings.yaml";
     private JCheckBox checkBox;
     private JTextField nowLang;
 
@@ -119,8 +123,13 @@ public class LOL_2_Chinese extends JFrame {
      * @return 语言名称（中文）
      */
     public String currentLanguage() {
-        String line, languageStr, lang = "";
-        try (BufferedReader reader = new BufferedReader(new FileReader(PATHNAME + FILENAME))) {
+        String line, languageStr, lang = "", pf;
+        if ( (new File(PATHNAME + FILENAME)).exists() ) {
+            pf = PATHNAME + FILENAME;
+        } else {
+            pf = PBE_PATHNAME + PBE_FILENAME;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(pf))) {
             while ( (line = reader.readLine()) != null) {
                 if (line.split(":")[0].trim().equals("locale")) {
                     languageStr = line.split(":")[1].trim();
@@ -128,6 +137,7 @@ public class LOL_2_Chinese extends JFrame {
                 }
             }
         } catch (IOException e) {
+            logger.severe("文件错误");
             e.printStackTrace();
         }
         return languageName(lang);
@@ -138,39 +148,48 @@ public class LOL_2_Chinese extends JFrame {
      * @param lang: 语言
      */
     public void changeLanguage(String lang) {
-        String path = "";
-        try (BufferedReader reader = new BufferedReader(new FileReader(PATHNAME + FILENAME))) {
+        String path = "", pathname, filename;
+        if ( (new File(PATHNAME + FILENAME)).exists() ) {
+            pathname = PATHNAME;
+            filename = FILENAME;
+        } else {
+            pathname = PBE_PATHNAME;
+            filename = PBE_PATHNAME;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(pathname + filename))) {
             if (checkBox.isSelected()) {
-                System.out.println("No D");
                 path = "C:\\ProgramData\\Riot Games\\Metadata\\";
+                logger.info("No D");
             } else {
-                System.out.println("D");
+                logger.info("D");
                 path = "D:\\";
             }
-            BufferedWriter writer = new BufferedWriter(new FileWriter(path + FILENAME));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path + filename));
             String line, languageStr, language;
             while ( (line = reader.readLine()) != null) {
                 if (line.split(":")[0].trim().equals("locale")) {
                     languageStr = line.split(":")[1].trim();
                     language = languageStr.substring(1, languageStr.length() - 1);
-                    System.out.println("当前语言：" + language);
+                    logger.info("当前语言：" + language);
                     line = line.replace(language, lang);
-                    System.out.println("选择语言：" + line);
+                    logger.info("选择语言：" + line);
                 }
                 writer.write(line);
                 writer.newLine();
             }
             writer.close();
         } catch (IOException e) {
+            logger.severe("文件错误");
             e.printStackTrace();
         }
 
         try {
             // 移动文件
-            Path source = Path.of(path + FILENAME);
-            Path target = Path.of(PATHNAME + FILENAME);
-            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+            Path source = Path.of(path + filename);
+            Path target = Path.of(pathname + filename);
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING); // 覆盖文件
         } catch (IOException e) {
+            logger.severe("文件错误");
             e.printStackTrace();
         }
         nowLang.setText(currentLanguage());
