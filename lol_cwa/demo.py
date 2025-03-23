@@ -1,7 +1,6 @@
 import pyaudio
 import numpy as np
 from funasr import AutoModel
-from translate import trans
 
 model_dir = 'E:\\ai_models\\iic\\speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
 
@@ -49,7 +48,9 @@ def audio_listener(callback):
                     count = 0
             else:
                 result += talk
-    except KeyboardInterrupt:
+    except Exception as e:
+        print(f"Error while reading audio: {e}")
+    finally:
         stream.stop_stream()
         stream.close()
         p.terminate()
