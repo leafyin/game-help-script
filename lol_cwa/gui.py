@@ -74,7 +74,6 @@ class AppGui:
                 sys.stdout = RedirectText(log_text)
                 threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
 
-
         # 启动按钮
         onoff_btn = tk.Button(root, text='开启', command=onoff)
         onoff_btn.pack(pady=10)
