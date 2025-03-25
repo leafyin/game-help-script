@@ -1,16 +1,23 @@
 # encoding=utf-8
+
 import sys
 import threading
 import time
 import tkinter as tk
+import pyaudio
+import numpy as np
+import keyboard
+import hashlib
+import random
+import requests
+
 from pathlib import Path
 from tkinter import ttk, filedialog, messagebox
-import keyboard
 from modelscope import snapshot_download
+from funasr import AutoModel
 
-from demo import *
-from translate import trans
-
+app_id = '20250321002311115'
+private_key = '2CIieDd6J1OvEWpSyoej'
 LANG = {
     'en': '英语',
     'kor': '韩语',
@@ -29,6 +36,91 @@ def model_download(path):
         local_dir=path
     )
     return model_dir
+
+
+def sign(q, salt):
+    text = app_id + q + salt + private_key
+    md5_hash = hashlib.md5()
+    md5_hash.update(text.encode("utf-8"))
+    return md5_hash.hexdigest()
+
+
+def translate(text, src, to):
+    salt = str(random.randint(10 ** 7, 10 ** 8 - 1))
+    url = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    data = {
+        "q": text,
+        "from": src,
+        "to": to,
+        "appid": app_id,
+        "salt": salt,
+        "sign": sign(text, salt)
+    }
+
+    try:
+        response = requests.post(url, data=data, headers=headers, timeout=10)
+        result = response.json()
+        return result['trans_result'][0]['dst']
+    except requests.exceptions.RequestException as e:
+        print("Request failed:", e)
+
+
+class SpeechModel:
+
+    def __init__(self, model_dir):
+        # 加载实时流式语音识别模型
+        self.model = AutoModel(
+            model=model_dir,
+            model_revision="v2.0.4",
+            disable_update=True,
+        )
+
+    def audio_listener(self, callback):
+        # 配置音频流参数
+        chunk_size = [0, 10, 5]  # 600ms
+        encoder_chunk_look_back = 4
+        decoder_chunk_look_back = 1
+        cache = {}
+
+        # 初始化麦克风录音
+        p = pyaudio.PyAudio()
+        stream = p.open(format=pyaudio.paInt16,
+                        channels=1,
+                        rate=16000,
+                        input=True,
+                        frames_per_buffer=9600)  # 600ms 的音频块
+        try:
+            result = ''
+            count = 0
+            while True:
+                audio_chunk = stream.read(9600)  # 600ms
+                speech_chunk = np.frombuffer(audio_chunk, dtype=np.int16)
+                # 传递给模型进行实时识别
+                res = self.model.generate(input=speech_chunk, cache=cache, is_final=False,
+                                          chunk_size=chunk_size,
+                                          encoder_chunk_look_back=encoder_chunk_look_back,
+                                          decoder_chunk_look_back=decoder_chunk_look_back)
+                talk = res[0]['text']
+                if talk == '':
+                    count += 1
+                    if count == 5:  # 5 * 600ms 设定3秒输出所说的话
+                        if len(result) != 0:
+                            callback(result)
+                            result = ''
+                        count = 0
+                else:
+                    result += talk
+        except Exception as e:
+            print(f"Error while reading audio: {e}")
+        finally:
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
 
 
 class RedirectText:
@@ -66,13 +158,10 @@ class AppGui:
 
         def onoff():
             # 启用音频监听
-            switch = True
-            if switch:
-                model_name = '\\iic\\speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
-                model_dir = save_path_entry.get()
-                speech_model = SpeechModel(model_dir + model_name)
-                sys.stdout = RedirectText(log_text)
-                threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
+            model_name = '\\iic\\speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
+            model_dir = save_path_entry.get()
+            speech_model = SpeechModel(model_dir + model_name)
+            threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
 
         # 启动按钮
         onoff_btn = tk.Button(root, text='开启', command=onoff)
@@ -148,7 +237,7 @@ class AppGui:
             source_text.insert(0, data)
 
             translate_text.delete(0, tk.END)
-            translate_text.insert(0, trans(data, 'zh', self.lang))
+            translate_text.insert(0, translate(data, 'zh', self.lang))
 
             keyboard.send('enter')
             time.sleep(0.05)
