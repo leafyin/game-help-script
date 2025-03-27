@@ -17,6 +17,7 @@ public class LOL_2_Chinese extends JFrame {
     private final static String PBE_FILENAME = "league_of_legends.pbe.product_settings.yaml";
     private JCheckBox checkBox;
     private JTextField nowLang;
+    private JCheckBox isPBE;
 
     private final static String[] LANGUAGES = {
             "简体中文",
@@ -68,11 +69,13 @@ public class LOL_2_Chinese extends JFrame {
             JPanel panel = new JPanel();
             panel.setLayout(new GridBagLayout());
             JLabel[] comboBoxLabels = {
+                    new JLabel("PBE请勾选"),
                     new JLabel("没有D盘请勾选："),
                     new JLabel("选择语言："),
                     new JLabel("当前语言：")
             };
             JComponent[] components = {
+                    isPBE = new JCheckBox(),
                     checkBox = new JCheckBox(),
                     getStringJComboBox(),
                     nowLang = new JTextField()
@@ -149,12 +152,12 @@ public class LOL_2_Chinese extends JFrame {
      */
     public void changeLanguage(String lang) {
         String path = "", pathname, filename;
-        if ( (new File(PATHNAME + FILENAME)).exists() ) {
-            pathname = PATHNAME;
-            filename = FILENAME;
-        } else {
+        if (isPBE.isSelected()) {
             pathname = PBE_PATHNAME;
             filename = PBE_FILENAME;
+        } else {
+            pathname = PATHNAME;
+            filename = FILENAME;
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(pathname + filename))) {
             if (checkBox.isSelected()) {
