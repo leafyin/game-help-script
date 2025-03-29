@@ -1,6 +1,6 @@
 # 游戏帮助脚本、工具
 
-## lol_cwa（语音识别、翻译，Chat With Anyone）
+## lol_cwa（实时语音识别、在线翻译，Chat With Anyone）
 
 ### 功能简介
 * 语音识别翻译助手（python tkinter GUI程序），实时语音识别并翻译，快速翻译并发送，与外服”友好”交流

@@ -27,11 +27,20 @@ LANG = {
 
 
 def lang_reverse():
+    """
+    字典反转
+    :return: 反转后的字典
+    """
     reversed_lang = {v: k for k, v in LANG.items()}
     return reversed_lang
 
 
 def model_download(path):
+    """
+    模型下载器
+    :param path: 路径
+    :return: ？？？
+    """
     model_name = 'iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
     for i in model_name.split('/'):
         path += f'{i}\\'
@@ -51,6 +60,13 @@ def sign(q, salt):
 
 
 def translate(text, src, to):
+    """
+    翻译
+    :param text: 原文
+    :param src: 原文语言
+    :param to: 译文语言
+    :return: 译文
+    """
     salt = str(random.randint(10 ** 7, 10 ** 8 - 1))
     url = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
 
