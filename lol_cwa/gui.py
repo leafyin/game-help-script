@@ -1,5 +1,6 @@
 # encoding=utf-8
-
+import json
+import os.path
 import sys
 import threading
 import time
@@ -23,6 +24,11 @@ LANG = {
     'jp': '日语',
     'ru': '俄语'
 }
+
+
+def lang_reverse():
+    reversed_lang = {v: k for k, v in LANG.items()}
+    return reversed_lang
 
 
 def model_download(path):
@@ -153,11 +159,35 @@ def grid(component: tk.Widget, row, column, padx=5, pady=5, sticky='nsew', colum
     )
 
 
+class Config:
+
+    def __init__(self):
+        self.config_path = '.\\config.json'
+
+    def save(self, json_data):
+        with open(self.config_path, 'w') as f:
+            json.dump(json_data, f, indent=4)
+
+    def load(self):
+        if not os.path.exists(self.config_path):
+            return None
+        with open(self.config_path, 'r') as f:
+            return json.load(f)
+
+
 class AppGui:
 
     def __init__(self):
         self.font = ("微软雅黑", 10)
         self.entry_font = ("微软雅黑", 20)
+
+        # 初始化用户配置
+        self.config = Config().load()
+        if self.config is None or len(self.config) < 2:
+            self.config = None
+            my_config = {}
+        else:
+            my_config = self.config
 
         self.lang = None
         root = tk.Tk()
@@ -181,6 +211,7 @@ class AppGui:
             speech_model = SpeechModel(model_dir + model_name)
             sys.stdout = RedirectText(log_text)
             sys.stderr = RedirectText(log_text)
+            Config().save(my_config)    # 保存配置
             threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
 
         # 启动按钮
@@ -193,19 +224,27 @@ class AppGui:
 
         save_path_label = tk.Label(frame, text='模型保存路径：', font=self.font)
         save_path_entry = tk.Entry(frame)
+
+        if self.config is not None:         # 模型路径配置
+            save_path_entry.insert(0, self.config['model_saved_path'])
+
         save_path_entry.config(state='readonly')
 
         grid(save_path_label, row=0, column=0)
         grid(save_path_entry, row=0, column=1)
 
-        # 模型存放位置
         def select_save_path():
+            """
+            选择模型存放位置
+            :return:
+            """
             filepath = filedialog.askdirectory(
                 title='选择保存位置'
             )
             save_path_entry.config(state='normal')
             save_path_entry.delete(0, tk.END)  # 清空输入框
             save_path_entry.insert(0, filepath)  # 插入用户选择的路径
+            my_config['model_saved_path'] = filepath
             save_path_entry.config(state='readonly')
 
         select_btn = tk.Button(frame, text="选择", command=select_save_path)
@@ -232,17 +271,27 @@ class AppGui:
         grid(select_lang_label, row=1, column=0)
 
         def on_select(event):
-            reversed_lang = {v: k for k, v in LANG.items()}
-            self.lang = reversed_lang[combobox.get()]
+            """
+            语言选择
+            :param event:
+            :return:
+            """
+            self.lang = lang_reverse()[combobox.get()]
+            my_config['lang'] = self.lang
 
         lang_name = []
         for v in LANG.values():
             lang_name.append(v)
         combobox = ttk.Combobox(frame, values=lang_name)
-        grid(combobox, row=1, column=1, columnspan=3)
-        combobox.set('请选择')
+
+        if self.config is not None:     # 语言配置
+            combobox.set(LANG[self.config['lang']])     # lang name
+        else:
+            combobox.set('请选择')
+
         combobox.config(state='readonly')
         combobox.bind('<<ComboboxSelected>>', on_select)
+        grid(combobox, row=1, column=1, columnspan=3)
 
         # frame2
         frame2 = tk.LabelFrame(root, text='控制台输出', bd=2, relief="groove", padx=5, pady=10)
@@ -283,7 +332,11 @@ class AppGui:
             source_text.insert(0, data)
 
             translate_text.delete(0, tk.END)
-            translate_text.insert(0, translate(data, 'zh', self.lang))
+
+            if self.lang is not None:   # 没选择语言则不翻译
+                translate_text.insert(0, translate(data, 'zh', self.lang))
+            else:
+                translate_text.insert(0, data)
 
         def send(event):
             keyboard.send('enter')
