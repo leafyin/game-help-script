@@ -18,21 +18,67 @@ from modelscope import snapshot_download
 
 app_id = '20250321002311115'
 private_key = '2CIieDd6J1OvEWpSyoej'
-LANG = {
-    'en': '英语',
-    'kor': '韩语',
-    'jp': '日语',
-    'ru': '俄语'
+lang_name = {
+    "zh": "中文",
+    "cht": "繁体中文",
+    "yue": "粤语",
+    "wyw": "文言文",
+    "en": "英语",
+    "jp": "日语",
+    "kor": "韩语",
+    "fra": "法语",
+    "spa": "西班牙语",
+    "th": "泰语",
+    "ara": "阿拉伯语",
+    "ru": "俄语",
+    "pt": "葡萄牙语",
+    "de": "德语",
+    "it": "意大利语",
+    "el": "希腊语",
+    "nl": "荷兰语",
+    "pl": "波兰语",
+    "bul": "保加利亚语",
+    "est": "爱沙尼亚语",
+    "dan": "丹麦语",
+    "fin": "芬兰语",
+    "cs": "捷克语",
+    "rom": "罗马尼亚语",
+    "slo": "斯洛文尼亚语",
+    "swe": "瑞典语",
+    "hu": "匈牙利语",
+    "vie": "越南语"
 }
 
-
-def lang_reverse():
-    """
-    字典反转
-    :return: 反转后的字典
-    """
-    reversed_lang = {v: k for k, v in LANG.items()}
-    return reversed_lang
+lang_code = {
+    "中文": "zh",
+    "繁体中文": "cht",
+    "英语": "en",
+    "粤语": "yue",
+    "文言文": "wyw",
+    "日语": "jp",
+    "韩语": "kor",
+    "法语": "fra",
+    "西班牙语": "spa",
+    "泰语": "th",
+    "阿拉伯语": "ara",
+    "俄语": "ru",
+    "葡萄牙语": "pt",
+    "德语": "de",
+    "意大利语": "it",
+    "希腊语": "el",
+    "荷兰语": "nl",
+    "波兰语": "pl",
+    "保加利亚语": "bul",
+    "爱沙尼亚语": "est",
+    "丹麦语": "dan",
+    "芬兰语": "fin",
+    "捷克语": "cs",
+    "罗马尼亚语": "rom",
+    "斯洛文尼亚语": "slo",
+    "瑞典语": "swe",
+    "匈牙利语": "hu",
+    "越南语": "vie"
+}
 
 
 def model_download(path):
@@ -292,16 +338,17 @@ class AppGui:
             :param event:
             :return:
             """
-            self.lang = lang_reverse()[combobox.get()]
+            self.lang = lang_code[combobox.get()]
             my_config['lang'] = self.lang
 
-        lang_name = []
-        for v in LANG.values():
-            lang_name.append(v)
-        combobox = ttk.Combobox(frame, values=lang_name)
+        lang_select_list = []
+        for v in lang_name.values():
+            lang_select_list.append(v)
+        combobox = ttk.Combobox(frame, values=lang_select_list)
 
         if self.config is not None:     # 语言配置
-            combobox.set(LANG[self.config['lang']])     # lang name
+            self.lang = self.config['lang']
+            combobox.set(lang_name[self.config['lang']])     # lang name
         else:
             combobox.set('请选择')
 
@@ -349,10 +396,10 @@ class AppGui:
 
             translate_text.delete(0, tk.END)
 
-            if self.lang is not None:   # 没选择语言则不翻译
-                translate_text.insert(0, translate(data, 'zh', self.lang))
-            else:
+            if self.lang is None or self.lang == 'zh':   # 没选择语言则不翻译
                 translate_text.insert(0, data)
+            else:
+                translate_text.insert(0, translate(data, 'zh', self.lang))
 
         def send(event):
             keyboard.send('enter')
