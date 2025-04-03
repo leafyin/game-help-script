@@ -3,6 +3,7 @@ package gui;
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -72,7 +73,7 @@ public class LOL_2_Chinese extends JFrame {
                     new JLabel("PBE请勾选"),
                     new JLabel("没有D盘请勾选："),
                     new JLabel("选择语言："),
-                    new JLabel("当前语言：")
+                    new JLabel("当前游戏语言：")
             };
             JComponent[] components = {
                     isPBE = new JCheckBox(),
@@ -140,7 +141,7 @@ public class LOL_2_Chinese extends JFrame {
                 }
             }
         } catch (IOException e) {
-            logger.severe("文件错误");
+            logger.severe("读取文件错误");
             e.printStackTrace();
         }
         return languageName(lang);
@@ -181,6 +182,9 @@ public class LOL_2_Chinese extends JFrame {
                 writer.newLine();
             }
             writer.close();
+        } catch (AccessDeniedException e) {
+            logger.warning("文件拒绝访问，请检查配置文件权限，取消勾选只读");
+            return;
         } catch (IOException e) {
             logger.severe("文件错误");
             e.printStackTrace();
@@ -192,7 +196,7 @@ public class LOL_2_Chinese extends JFrame {
             Path target = Path.of(pathname + filename);
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING); // 覆盖文件
         } catch (IOException e) {
-            logger.severe("文件错误");
+            logger.severe("替换文件错误！");
             e.printStackTrace();
         }
         nowLang.setText(currentLanguage());
