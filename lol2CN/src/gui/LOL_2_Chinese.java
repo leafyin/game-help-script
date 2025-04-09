@@ -16,7 +16,6 @@ public class LOL_2_Chinese extends JFrame {
     private final static String PBE_PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.pbe\\";
     private final static String FILENAME = "league_of_legends.live.product_settings.yaml";
     private final static String PBE_FILENAME = "league_of_legends.pbe.product_settings.yaml";
-    private JCheckBox checkBox;
     private JTextField nowLang;
     private JCheckBox isPBE;
 
@@ -56,7 +55,7 @@ public class LOL_2_Chinese extends JFrame {
 
     public LOL_2_Chinese (){
         SwingUtilities.invokeLater(() -> {
-            this.setTitle("英雄联盟外服语言切换工具");
+            this.setTitle("LOL外服语言切换工具");
             int width = 400, height = 200;
             this.setSize(width, height);
             this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
@@ -71,15 +70,13 @@ public class LOL_2_Chinese extends JFrame {
             panel.setLayout(new GridBagLayout());
             JLabel[] comboBoxLabels = {
                     new JLabel("PBE请勾选"),
-                    new JLabel("没有D盘请勾选："),
-                    new JLabel("选择语言："),
-                    new JLabel("当前游戏语言：")
+                    new JLabel("当前游戏客户端语言："),
+                    new JLabel("选择语言：")
             };
             JComponent[] components = {
                     isPBE = new JCheckBox(),
-                    checkBox = new JCheckBox(),
-                    getStringJComboBox(),
-                    nowLang = new JTextField()
+                    nowLang = new JTextField(),
+                    getStringJComboBox()
             };
 
             nowLang.setEditable(false);
@@ -140,7 +137,8 @@ public class LOL_2_Chinese extends JFrame {
                     lang = languageStr.substring(1, languageStr.length() - 1);
                 }
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logger.severe("读取文件错误");
             e.printStackTrace();
         }
@@ -161,13 +159,7 @@ public class LOL_2_Chinese extends JFrame {
             filename = FILENAME;
         }
         try (BufferedReader reader = new BufferedReader(new FileReader(pathname + filename))) {
-            if (checkBox.isSelected()) {
-                path = "C:\\ProgramData\\Riot Games\\Metadata\\";
-                logger.info("No D");
-            } else {
-                logger.info("D");
-                path = "D:\\";
-            }
+            path = "C:\\ProgramData\\Riot Games\\Metadata\\";
             BufferedWriter writer = new BufferedWriter(new FileWriter(path + filename));
             String line, languageStr, language;
             while ( (line = reader.readLine()) != null) {
@@ -182,9 +174,9 @@ public class LOL_2_Chinese extends JFrame {
                 writer.newLine();
             }
             writer.close();
-        } catch (AccessDeniedException e) {
-            logger.warning("文件拒绝访问，请检查配置文件权限，取消勾选只读");
-            return;
+        } catch (FileNotFoundException e) {
+            logger.warning("没有PBE或正式服的语言配置文件");
+            e.printStackTrace();
         } catch (IOException e) {
             logger.severe("文件错误");
             e.printStackTrace();
@@ -195,8 +187,10 @@ public class LOL_2_Chinese extends JFrame {
             Path source = Path.of(path + filename);
             Path target = Path.of(pathname + filename);
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING); // 覆盖文件
+        } catch (AccessDeniedException e) {
+            logger.warning("覆盖文件时拒绝访问，请检查配置文件权限，取消勾选只读");
         } catch (IOException e) {
-            logger.severe("替换文件错误！");
+            logger.severe("移动文件错误！");
             e.printStackTrace();
         }
         nowLang.setText(currentLanguage());

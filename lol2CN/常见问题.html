@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常见问题解答</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .faq-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .question {
+            font-weight: bold;
+            color: #2980b9;
+            margin-top: 15px;
+        }
+
+        .answer {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .note {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>常见问题解答</h1>
+
+<div class="faq-container">
+    <div class="question">1. 双击start.bat文件后一闪而过打不开</div>
+    <div class="answer">解压文件时需要把app、runtime、exe三个文件全部解压到同一目录</div>
+
+    <div class="question">2. 出现"没有PBE或正式服的语言配置文件"</div>
+    <div class="answer">重启你的拳头客户端，并重启程序</div>
+
+    <div class="question">3. 出现"覆盖文件时拒绝访问..."</div>
+    <div class="answer">
+        检查以下目录下后缀为.yaml的文件属性是否为只读：<br>
+        - C:\ProgramData\Riot Games\Metadata\league_of_legends.live\<br>
+        - C:\ProgramData\Riot Games\Metadata\league_of_legends.pbe\<br>
+        如果是只读，则取消勾选。还可以将exe程序用管理员权限打开
+    </div>
+
+    <div class="question">4. 出现其他类型的错误</div>
+    <div class="answer">可以@群主寻求帮助</div>
+
+    <div class="question">5. 切换简体中文语言成功后，首页会有部分字体未被汉化</div>
+    <div class="answer">
+        重启游戏客户端即可解决，不重启也不影响游戏内的语言和语音。<br>
+        注意：非简体中文则不受此问题影响
+    </div>
+
+    <div class="note">如果以上解答未能解决您的问题，请联系客服或群管理员获取进一步帮助。</div>
+</div>
+</body>
+</html>

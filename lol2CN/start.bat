@@ -1,1 +1,0 @@
-.\\runtime\\bin\\java -jar .\\app\\LOL_2_Chinese.jar
