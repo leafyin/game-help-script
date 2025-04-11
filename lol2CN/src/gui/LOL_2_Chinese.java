@@ -1,5 +1,7 @@
 package gui;
 
+import util.PropertiesConfig;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
@@ -7,6 +9,7 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -17,12 +20,10 @@ public class LOL_2_Chinese extends JFrame {
     private final static String PBE_PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.pbe\\";
     private final static String FILENAME = "league_of_legends.live.product_settings.yaml";
     private final static String PBE_FILENAME = "league_of_legends.pbe.product_settings.yaml";
-    private final static Properties PROPS = new Properties();
-    private final static String CONFIG_DIR = ".\\conf\\";
-    private final static String CONFIG_NAME = "config.properties";
+    private final PropertiesConfig propertiesConfig = new PropertiesConfig();
+    private final Properties props = PropertiesConfig.getProps();
     private JTextField nowLang;
     private JCheckBox isPBE;
-
     private final static String[] LANGUAGES = {
             "简体中文",
             "阿拉伯语（阿联酋）",
@@ -85,42 +86,18 @@ public class LOL_2_Chinese extends JFrame {
 
             isPBE.addActionListener(e -> {
                 if (isPBE.isSelected()) {
-                    PROPS.setProperty("isPBE", "true");
+                    props.setProperty("isPBE", "true");
                 } else {
-                    PROPS.setProperty("isPBE", "false");
+                    props.setProperty("isPBE", "false");
                 }
-                saveConfig(PROPS);
+                PropertiesConfig.save(props);
             });
 
             // 配置
-            try {
+            Hashtable<String, Object> config = propertiesConfig.getConfig();
 
-                File file = new File(CONFIG_DIR);
-                if (!file.exists()) {
-                    if (file.mkdir()) {
-                        file = new File(CONFIG_DIR + CONFIG_NAME);
-                        if (file.createNewFile()) {
-                            PROPS.setProperty("isPBE", "false");
-                            PROPS.setProperty("lang", "zh_CN");
-                            saveConfig(PROPS);
-                            logger.info("配置文件已创建");
-                        } else {
-                            logger.info("配置文件创建失败");
-                        }
-                    } else {
-                        logger.info("文件夹创建失败");
-                    }
-                } else {
-                    PROPS.load(new FileInputStream(CONFIG_DIR + CONFIG_NAME));
-                    boolean isPBE_ = Boolean.parseBoolean(PROPS.getProperty("isPBE"));
-                    String lang = PROPS.getProperty("lang");
-                    isPBE.setSelected(isPBE_);
-                    changeLanguage(lang);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            isPBE.setSelected((Boolean) config.get("isPBE"));
+            changeLanguage((String) config.get("lang"));
             nowLang.setEditable(false);
             nowLang.setText(currentLanguage());
 
@@ -146,15 +123,6 @@ public class LOL_2_Chinese extends JFrame {
         });
     }
 
-    public static void saveConfig(Properties props) {
-        try (OutputStream output = new FileOutputStream(CONFIG_DIR + CONFIG_NAME)) {
-            props.store(output, "Updated configuration");
-            logger.info("配置已保存。");
-        } catch (IOException e) {
-            logger.severe("无法保存配置文件: " + e.getMessage());
-        }
-    }
-
     /**
      * 语言选择下拉框
      * @return comboBox
@@ -166,8 +134,8 @@ public class LOL_2_Chinese extends JFrame {
             assert selectedOption != null;
             String langCode = languageCode(selectedOption);
             changeLanguage(langCode);
-            PROPS.setProperty("lang", langCode);
-            saveConfig(PROPS);
+            props.setProperty("lang", langCode);
+            PropertiesConfig.save(props);
         });
         return comboBox;
     }
