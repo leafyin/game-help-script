@@ -1,3 +1,3 @@
-Manifest-Version: 0.2
+Manifest-Version: 0.3
 Main-Class: gui.LOL_2_Chinese
 

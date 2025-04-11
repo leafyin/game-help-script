@@ -7,6 +7,7 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class LOL_2_Chinese extends JFrame {
@@ -16,6 +17,9 @@ public class LOL_2_Chinese extends JFrame {
     private final static String PBE_PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.pbe\\";
     private final static String FILENAME = "league_of_legends.live.product_settings.yaml";
     private final static String PBE_FILENAME = "league_of_legends.pbe.product_settings.yaml";
+    private final static Properties PROPS = new Properties();
+    private final static String CONFIG_DIR = ".\\conf\\";
+    private final static String CONFIG_NAME = "config.properties";
     private JTextField nowLang;
     private JCheckBox isPBE;
 
@@ -68,16 +72,54 @@ public class LOL_2_Chinese extends JFrame {
 
             JPanel panel = new JPanel();
             panel.setLayout(new GridBagLayout());
-            JLabel[] comboBoxLabels = {
-                    new JLabel("PBE请勾选"),
-                    new JLabel("当前游戏客户端语言："),
+            JLabel[] labels = {
+                    new JLabel("PBE请勾选："),
+                    new JLabel("当前客户端语言："),
                     new JLabel("选择语言：")
             };
             JComponent[] components = {
                     isPBE = new JCheckBox(),
                     nowLang = new JTextField(),
-                    getStringJComboBox()
+                    this.getStringJComboBox()
             };
+
+            isPBE.addActionListener(e -> {
+                if (isPBE.isSelected()) {
+                    PROPS.setProperty("isPBE", "true");
+                } else {
+                    PROPS.setProperty("isPBE", "false");
+                }
+                saveConfig(PROPS);
+            });
+
+            // 配置
+            try {
+
+                File file = new File(CONFIG_DIR);
+                if (!file.exists()) {
+                    if (file.mkdir()) {
+                        file = new File(CONFIG_DIR + CONFIG_NAME);
+                        if (file.createNewFile()) {
+                            PROPS.setProperty("isPBE", "false");
+                            PROPS.setProperty("lang", "zh_CN");
+                            saveConfig(PROPS);
+                            logger.info("配置文件已创建");
+                        } else {
+                            logger.info("配置文件创建失败");
+                        }
+                    } else {
+                        logger.info("文件夹创建失败");
+                    }
+                } else {
+                    PROPS.load(new FileInputStream(CONFIG_DIR + CONFIG_NAME));
+                    boolean isPBE_ = Boolean.parseBoolean(PROPS.getProperty("isPBE"));
+                    String lang = PROPS.getProperty("lang");
+                    isPBE.setSelected(isPBE_);
+                    changeLanguage(lang);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             nowLang.setEditable(false);
             nowLang.setText(currentLanguage());
@@ -89,8 +131,8 @@ public class LOL_2_Chinese extends JFrame {
             gbc.gridx = 0; // 列索引
             gbc.gridy = 0; // 行索引
 
-            for (int i = 0;i < comboBoxLabels.length;i++) {
-                panel.add(comboBoxLabels[i], gbc);
+            for (int i = 0;i < labels.length;i++) {
+                panel.add(labels[i], gbc);
                 gbc.gridx++;
                 panel.add(components[i], gbc);
                 if (gbc.gridx == 1) {
@@ -104,6 +146,15 @@ public class LOL_2_Chinese extends JFrame {
         });
     }
 
+    public static void saveConfig(Properties props) {
+        try (OutputStream output = new FileOutputStream(CONFIG_DIR + CONFIG_NAME)) {
+            props.store(output, "Updated configuration");
+            logger.info("配置已保存。");
+        } catch (IOException e) {
+            logger.severe("无法保存配置文件: " + e.getMessage());
+        }
+    }
+
     /**
      * 语言选择下拉框
      * @return comboBox
@@ -115,6 +166,8 @@ public class LOL_2_Chinese extends JFrame {
             assert selectedOption != null;
             String langCode = languageCode(selectedOption);
             changeLanguage(langCode);
+            PROPS.setProperty("lang", langCode);
+            saveConfig(PROPS);
         });
         return comboBox;
     }
