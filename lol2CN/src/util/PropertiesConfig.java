@@ -53,6 +53,15 @@ public class PropertiesConfig {
         }
     }
 
+    public static Properties getProps(Properties props) {
+        try {
+            props.load(new FileInputStream(CONFIG_DIR + CONFIG_NAME));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return props;
+    }
+
     public static Properties getProps() {
         Properties props = new Properties();
         try {

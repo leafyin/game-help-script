@@ -1,5 +1,7 @@
 package controller;
 
+import util.PropertiesConfig;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +10,7 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 public class LanguageController {
@@ -20,22 +23,24 @@ public class LanguageController {
     /**
      * 重置语言定时器
      */
-    public void changeTimer(String configLang, JCheckBox isPBE) {
+    public void changeTimer(JCheckBox isPBE) {
         int DELAY = 5;
         Timer timer = new Timer(DELAY * 1000, new ActionListener() {
             private int count = 0;
+            private final Properties props = new Properties();
             @Override
             public void actionPerformed(ActionEvent e) {
                 count++;
                 String localLang = languageCode(currentLanguage());
+                String configLang = PropertiesConfig.getProps(props).getProperty("lang");
                 if (!configLang.equals(localLang)) {
-                    logger.info("local language not same as config：" + localLang);
+                    logger.info("not same--local：" + localLang + "config：" + configLang);
                     changeLanguage(isPBE, configLang);
                 } else {
                     if (count >= 360) {
                         ((Timer)e.getSource()).stop();
                     }
-                    logger.info("same:" + localLang);
+                    logger.info("same--local：" + localLang + "config：" + configLang);
                 }
             }
         });

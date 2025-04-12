@@ -94,7 +94,7 @@ public class LOL_2_Chinese extends JFrame {
             nowLang.setEditable(false);
 
             // Timer
-            languageController.changeTimer((String) config.get("lang"), isPBE);
+            languageController.changeTimer(isPBE);
 
             // 布局
             GridBagConstraints gbc = new GridBagConstraints();
