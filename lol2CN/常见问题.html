@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>常见问题解答</title>
+    <title>英雄联盟语言切换工具 - 常见问题</title>
     <style>
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
@@ -16,67 +16,136 @@
             background-color: #f5f5f5;
         }
 
-        h1 {
-            color: #2c3e50;
+        .header {
             text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
         }
 
         .faq-container {
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-top: 20px;
+            padding: 25px;
         }
 
         .question {
             font-weight: bold;
-            color: #2980b9;
-            margin-top: 15px;
+            color: #1e40af;
+            margin-top: 20px;
+            font-size: 18px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .question-number {
+            background-color: #1e40af;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            flex-shrink: 0;
         }
 
         .answer {
-            margin-left: 20px;
-            margin-bottom: 15px;
+            margin-left: 35px;
+            margin-bottom: 25px;
+            color: #4b5563;
         }
 
         .note {
-            font-style: italic;
-            color: #7f8c8d;
-            margin-top: 20px;
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        .path {
+            font-family: monospace;
+            background-color: #f3f4f6;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .highlight {
+            color: #dc2626;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-<h1>常见问题解答</h1>
+<div class="header">
+    <h1>英雄联盟语言切换工具</h1>
+    <div class="subtitle">常见问题解答</div>
+</div>
 
 <div class="faq-container">
-    <div class="question">1. 双击exe文件后一闪而过打不开</div>
-    <div class="answer">解压文件时需要把app、runtime、exe三个文件全部解压到同一目录</div>
-
-    <div class="question">2. 出现"没有PBE或正式服的语言配置文件"</div>
-    <div class="answer">重启你的拳头客户端，并重启程序</div>
-
-    <div class="question">3. 出现"覆盖文件时拒绝访问..."</div>
+    <div class="question">
+        <div class="question-number">1</div>
+        <div>双击exe文件后一闪而过打不开</div>
+    </div>
     <div class="answer">
-        检查以下目录下后缀为.yaml的文件属性是否为只读：<br>
-        - C:\ProgramData\Riot Games\Metadata\league_of_legends.live\<br>
-        - C:\ProgramData\Riot Games\Metadata\league_of_legends.pbe\<br>
-        如果是只读，则取消勾选。还可以将exe程序用管理员权限打开
+        解压文件时需要把 <span class="highlight">app</span>、<span class="highlight">runtime</span>、<span class="highlight">.exe</span> 三个文件全部解压到同一目录
     </div>
 
-    <div class="question">4. 出现其他类型的错误</div>
-    <div class="answer">可以@群主寻求帮助</div>
-
-    <div class="question">5. 切换简体中文语言成功后，首页会有部分字体未被汉化</div>
+    <div class="question">
+        <div class="question-number">2</div>
+        <div>切换语言不成功时的检查方法</div>
+    </div>
     <div class="answer">
-        重启游戏客户端即可解决，不重启也不影响游戏内的语言和语音。<br>
-        注意：非简体中文则不受此问题影响
+        <p>请检查以下目录下后缀为.yaml的文件属性是否为只读：</p>
+        <p class="path">C:\ProgramData\Riot Games\Metadata\league_of_legends.live\</p>
+        <p class="path">C:\ProgramData\Riot Games\Metadata\league_of_legends.pbe\</p>
+        <p>如果是只读，则取消勾选。</p>
+        <p>也可以选择删除.yaml文件并再次重启拳头客户端，检查前面两个目录重新生成的.yaml文件后则可以继续使用切换工具。</p>
     </div>
 
-    <div class="note">如果以上解答未能解决您的问题，请联系客服或群管理员获取进一步帮助。</div>
+    <div class="question">
+        <div class="question-number">3</div>
+        <div>切换简体中文语言后首页部分字体未被汉化</div>
+    </div>
+    <div class="answer">
+        这是正常现象，重启游戏客户端即可完全显示简体中文。<br>
+        不重启也不影响游戏内的语言和语音。<br>
+        注意：非简体中文语言则不受此问题影响。
+    </div>
+
+    <div class="question">
+        <div class="question-number">4</div>
+        <div>一劳永逸的解决方案</div>
+    </div>
+    <div class="answer">
+        将本程序exe创建快捷方式并把快捷方式加入开机启动项。<br>
+        开机启动后会有30分钟的定时器，每5秒检测游戏客户端语言与配置是否一致。<br>
+        这样设置后，在进入游戏时就无需手动切换语言了。
+    </div>
+
+    <div class="question">
+        <div class="question-number">5</div>
+        <div>出现其他类型的错误</div>
+    </div>
+    <div class="answer">
+        可以 @群主 寻求帮助。
+    </div>
+
+    <div class="note">
+        <strong>温馨提示：</strong> 使用本工具前请确保已关闭英雄联盟客户端，修改完成后重新启动客户端即可生效。
+    </div>
 </div>
 </body>
 </html>

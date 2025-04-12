@@ -22,7 +22,7 @@ public class PropertiesConfig {
         this.config = config;
     }
 
-    private static final Logger logger = Logger.getLogger(LOL_2_Chinese.class.getName());
+    private static final Logger logger = Logger.getLogger(PropertiesConfig.class.getName());
     private static final String CONFIG_DIR = ".\\conf\\";
     private static final String CONFIG_NAME = "config.properties";
 
