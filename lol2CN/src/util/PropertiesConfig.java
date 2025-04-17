@@ -1,7 +1,5 @@
 package util;
 
-import gui.LOL_2_Chinese;
-
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -17,6 +15,7 @@ public class PropertiesConfig {
 
     public void setConfig(Properties props) {
         Hashtable<String, Object> config = new Hashtable<>();
+        config.put("startup", Boolean.parseBoolean(props.getProperty("startup")));
         config.put("isPBE", Boolean.parseBoolean(props.getProperty("isPBE")));
         config.put("lang", props.getProperty("lang"));
         this.config = config;
@@ -34,6 +33,7 @@ public class PropertiesConfig {
                 if (file.mkdir()) {
                     file = new File(CONFIG_DIR + CONFIG_NAME);
                     if (file.createNewFile()) {
+                        props.setProperty("startup", "false");
                         props.setProperty("isPBE", "false");
                         props.setProperty("lang", "zh_CN");
                         save(props);

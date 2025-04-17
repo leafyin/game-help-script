@@ -1,5 +1,6 @@
 package controller;
 
+import gui.Home;
 import util.PropertiesConfig;
 
 import javax.swing.*;
@@ -24,7 +25,7 @@ public class LanguageController {
      * 重置语言定时器
      */
     public void changeTimer(JCheckBox isPBE) {
-        int DELAY = 5;
+        int DELAY = 2;
         Timer timer = new Timer(DELAY * 1000, new ActionListener() {
             private int count = 0;
             private final Properties props = new Properties();
@@ -34,13 +35,13 @@ public class LanguageController {
                 String localLang = languageCode(currentLanguage());
                 String configLang = PropertiesConfig.getProps(props).getProperty("lang");
                 if (!configLang.equals(localLang)) {
-                    logger.info("not same--local：" + localLang + "config：" + configLang);
+                    Home.OUTPUT.setText("not same--local：" + localLang + "config：" + configLang);
                     changeLanguage(isPBE, configLang);
                 } else {
                     if (count >= 360) {
                         ((Timer)e.getSource()).stop();
                     }
-                    logger.info("same--local：" + localLang + "config：" + configLang);
+                    Home.OUTPUT.setText("same--local：" + localLang + "config：" + configLang);
                 }
             }
         });

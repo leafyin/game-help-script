@@ -14,13 +14,13 @@ if errorlevel 1 (
 )
 
 @rem 编译
-javac -d src\out -sourcepath src src\gui\LOL_2_Chinese.java
+javac -d src\out -sourcepath src src\gui\Home.java
 
 @rem jar
-jar cvfm src\out\target\LOL_2_Chinese.jar src\META-INF\MANIFEST.MF -C src\out .
+jar cvfm src\out\target\Home.jar src\META-INF\MANIFEST.MF -C src\out .
 
 @rem exe
-jpackage --name lol2Chinese --input E:\game-help-script\lol2CN\src\out\target --main-jar LOL_2_Chinese.jar --main-class gui.LOL_2_Chinese --type app-image --runtime-image myruntime --vendor "火花spk" --copyright "copyright 2025" --app-version 1.4 --verbose
+jpackage --name lol2Chinese --input E:\game-help-script\lol2CN\src\out\target --main-jar Home.jar --main-class gui.Home --type app-image --runtime-image myruntime --vendor "火花spk" --copyright "copyright 2025" --app-version 1.5 --verbose
 
 @rem zip
 copy 常见问题.html lol2Chinese\
