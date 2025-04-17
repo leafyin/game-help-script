@@ -2,31 +2,90 @@ package controller;
 
 import gui.Home;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class SettingController {
 
-    private static final Logger logger = Logger.getLogger(SettingController.class.getName());
-
     public SettingController(){}
+
+    public static class ExecuteResult {
+        private final int exitCode;
+        private final String output;
+
+        public int getExitCode() {
+            return exitCode;
+        }
+
+        public String getOutput() {
+            return output;
+        }
+
+        public ExecuteResult(int exitCode, String output) {
+            this.exitCode = exitCode;
+            this.output = output;
+        }
+
+        // getters...
+    }
+
+    public static ExecuteResult executeCommand(List<String> command, long timeout, TimeUnit timeUnit)
+            throws IOException, InterruptedException, TimeoutException {
+
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.redirectErrorStream(true);
+
+        Process process = pb.start();
+
+        try (InputStream is = process.getInputStream();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+
+            StringBuilder output = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+
+            if (!process.waitFor(timeout, timeUnit)) {
+                process.destroyForcibly();
+                throw new TimeoutException("Command timed out: " + command);
+            }
+
+            return new ExecuteResult(process.exitValue(), output.toString());
+        }
+    }
 
     /**
      * 启用开机自启动
      * @param appName 注册表中显示的名称（如"MyApp"）
      * @param appPath 程序的完整路径（如 "C:\MyApp\app.jar"）
      */
-    public static void enableAutoStart1(String appName, String appPath) {
+    public static void enableAutoStart(String appName, String appPath) {
         try {
             // 构造注册表命令
-            String cmd = "reg add HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v "
-                    + "\"" + appName + "\" /t REG_SZ /d \"" + appPath + "\" /f";
-
-            // 执行命令
-            Runtime.getRuntime().exec(cmd);
-            Home.OUTPUT.setText("已添加开机自启: " + appName);
-        } catch (IOException e) {
-            Home.OUTPUT.setText("添加开机自启失败: " + e.getMessage());
+            ExecuteResult result = executeCommand(
+                    Arrays.asList(
+                            "reg",
+                            "add",
+                            "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                            "/v",
+                            "\"" + appName + "\"",
+                            "/t",
+                            "REG_SZ",
+                            "/d",
+                            "\"" + appPath + "\"",
+                            "/f"
+                            ),
+                    10, TimeUnit.SECONDS);
+            Home.OUTPUT.append("已添加开机自启: " + appName);
+        } catch (Exception e) {
+            Home.OUTPUT.append(e.getMessage());
         }
     }
 
@@ -34,23 +93,32 @@ public class SettingController {
      * 禁用开机自启动
      * @param appName 注册表中的名称
      */
-    public static void disableAutoStart1(String appName) {
+    public static void disableAutoStart(String appName) {
         try {
-            String cmd = "reg delete HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v "
-                    + "\"" + appName + "\" /f";
-            Runtime.getRuntime().exec(cmd);
-            Home.OUTPUT.setText("已移除开机自启: " + appName);
-        } catch (IOException e) {
-            Home.OUTPUT.setText("移除开机自启失败: " + appName);
+            // 构造注册表命令
+            ExecuteResult result = executeCommand(
+                    Arrays.asList(
+                            "reg",
+                            "delete",
+                            "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+                            "/v",
+                            "\"" + appName + "\"",
+                            "/f"
+                    ),
+                    10, TimeUnit.SECONDS);
+            Home.OUTPUT.append("已移除开机自启: " + appName);
+        } catch (Exception e) {
+            Home.OUTPUT.append(e.getMessage());
         }
     }
 
     /**
-     * 启用开机自启动
+     * 添加计划任务
      * @param taskName 计划任务中显示的名称（如"MyApp"）
-     * @param exePath 程序的完整路径（如 "C:\MyApp\app.jar"）
+     * @param exePath 程序的完整路径（如 "C:\MyApp\app.exe"）
      */
-    public static void enableAutoStart(String taskName, String exePath) {
+    @Deprecated
+    public static void createTask(String taskName, String exePath) {
         try {
             // 计划任务
             String cmd = "schtasks /create /tn \"" + taskName + "\" " +
@@ -65,10 +133,11 @@ public class SettingController {
     }
 
     /**
-     * 禁用开机自启动
+     * 删除计划任务
      * @param taskName 计划任务中的名称
      */
-    public static void disableAutoStart(String taskName) {
+    @Deprecated
+    public static void deleteTask(String taskName) {
         try {
             String cmd = "schtasks /delete /tn \"" + taskName + "\"";
 

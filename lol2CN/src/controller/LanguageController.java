@@ -12,20 +12,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class LanguageController {
-    private static final Logger logger = Logger.getLogger(LanguageController.class.getName());
     private final static String PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.live\\";
     private final static String PBE_PATHNAME = "C:\\ProgramData\\Riot Games\\Metadata\\league_of_legends.pbe\\";
     private final static String FILENAME = "league_of_legends.live.product_settings.yaml";
     private final static String PBE_FILENAME = "league_of_legends.pbe.product_settings.yaml";
 
     /**
-     * 重置语言定时器
+     * 重置语言定时器 DELAY * timeout = 定时器持续的时间（秒）
      */
-    public void changeTimer(JCheckBox isPBE) {
+    public void changeTimer() {
         int DELAY = 2;
+        int timeout = 1800;
         Timer timer = new Timer(DELAY * 1000, new ActionListener() {
             private int count = 0;
             private final Properties props = new Properties();
@@ -35,13 +34,13 @@ public class LanguageController {
                 String localLang = languageCode(currentLanguage());
                 String configLang = PropertiesConfig.getProps(props).getProperty("lang");
                 if (!configLang.equals(localLang)) {
-                    Home.OUTPUT.setText("not same--local：" + localLang + "config：" + configLang);
-                    changeLanguage(isPBE, configLang);
+                    Home.OUTPUT.append("Not same local：" + localLang + "===" + "config：" + configLang);
+                    changeLanguage(configLang);
                 } else {
-                    if (count >= 360) {
+                    if (count >= timeout) {
                         ((Timer)e.getSource()).stop();
                     }
-                    Home.OUTPUT.setText("same--local：" + localLang + "config：" + configLang);
+                    Home.OUTPUT.append("Same local：" + localLang + "===" + "config：" + configLang);
                 }
             }
         });
@@ -53,9 +52,9 @@ public class LanguageController {
      * 切换语言
      * @param lang: 语言
      */
-    public void changeLanguage(JCheckBox isPBE, JTextField nowLang, String lang) {
+    public void changeLanguage(String lang) {
         String path = "", pathname, filename;
-        if (isPBE.isSelected()) {
+        if (Home.isPBE.isSelected()) {
             pathname = PBE_PATHNAME;
             filename = PBE_FILENAME;
         } else {
@@ -70,20 +69,28 @@ public class LanguageController {
                 if (line.split(":")[0].trim().equals("locale")) {
                     languageStr = line.split(":")[1].trim();
                     language = languageStr.substring(1, languageStr.length() - 1);
-                    logger.info("当前语言：" + language);
+                    Home.OUTPUT.append("当前语言：" + language);
                     line = line.replace(language, lang);
-                    logger.info("选择语言：" + line);
+                    Home.OUTPUT.append("选择语言：" + line);
                 }
                 writer.write(line);
                 writer.newLine();
             }
             writer.close();
         } catch (FileNotFoundException e) {
-            logger.warning("没有PBE或正式服的语言配置文件");
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    "没有PBE或正式服的语言配置文件" + e.getMessage(),
+                    "提示",
+                    JOptionPane.WARNING_MESSAGE
+            );
         } catch (IOException e) {
-            logger.severe("文件错误");
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    "读取、写入文件错误" + e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
 
         try {
@@ -92,62 +99,21 @@ public class LanguageController {
             Path target = Path.of(pathname + filename);
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING); // 覆盖文件
         } catch (AccessDeniedException e) {
-            logger.warning("覆盖文件时拒绝访问，请检查配置文件权限，取消勾选只读");
+            JOptionPane.showMessageDialog(
+                    null,
+                    "覆盖文件时拒绝访问，请检查配置文件权限，取消勾选只读" + e.getMessage(),
+                    "提示",
+                    JOptionPane.WARNING_MESSAGE
+            );
         } catch (IOException e) {
-            logger.severe("移动文件错误！");
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    "移动文件错误" + e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
-        nowLang.setText(currentLanguage());
-    }
-
-    /**
-     * 切换语言
-     * @param lang: 语言
-     */
-    public void changeLanguage(JCheckBox isPBE, String lang) {
-        String path = "", pathname, filename;
-        if (isPBE.isSelected()) {
-            pathname = PBE_PATHNAME;
-            filename = PBE_FILENAME;
-        } else {
-            pathname = PATHNAME;
-            filename = FILENAME;
-        }
-        try (BufferedReader reader = new BufferedReader(new FileReader(pathname + filename))) {
-            path = "C:\\ProgramData\\Riot Games\\Metadata\\";
-            BufferedWriter writer = new BufferedWriter(new FileWriter(path + filename));
-            String line, languageStr, language;
-            while ( (line = reader.readLine()) != null) {
-                if (line.split(":")[0].trim().equals("locale")) {
-                    languageStr = line.split(":")[1].trim();
-                    language = languageStr.substring(1, languageStr.length() - 1);
-                    logger.info("当前语言：" + language);
-                    line = line.replace(language, lang);
-                    logger.info("选择语言：" + line);
-                }
-                writer.write(line);
-                writer.newLine();
-            }
-            writer.close();
-        } catch (FileNotFoundException e) {
-            logger.warning("没有PBE或正式服的语言配置文件");
-            e.printStackTrace();
-        } catch (IOException e) {
-            logger.severe("文件错误");
-            e.printStackTrace();
-        }
-
-        try {
-            // 移动文件
-            Path source = Path.of(path + filename);
-            Path target = Path.of(pathname + filename);
-            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING); // 覆盖文件
-        } catch (AccessDeniedException e) {
-            logger.warning("覆盖文件时拒绝访问，请检查配置文件权限，取消勾选只读");
-        } catch (IOException e) {
-            logger.severe("移动文件错误！");
-            e.printStackTrace();
-        }
+        Home.nowLang.setText(currentLanguage());
     }
 
     /**
@@ -170,8 +136,12 @@ public class LanguageController {
             }
         }
         catch (IOException e) {
-            logger.severe("读取文件错误");
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    "读取文件错误" + e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         return languageName(lang);
     }

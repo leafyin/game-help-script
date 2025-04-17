@@ -7,22 +7,18 @@ import util.PropertiesConfig;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class Home extends JFrame {
-
-    private static final Logger logger = Logger.getLogger(Home.class.getName());
     private final PropertiesConfig propertiesConfig = new PropertiesConfig();
     private final Properties props = PropertiesConfig.getProps();
     private final LanguageController languageController = new LanguageController();
-    private JTextField nowLang;
-    private JCheckBox isPBE;
-    public static final JTextArea OUTPUT = new JTextArea(5, 10);
-    private JCheckBox startup;
+    public static JTextField nowLang;
+    public static JCheckBox isPBE;
+    public static JCheckBox startup;
+    public static final JTextArea OUTPUT = new OutputArea(5, 10);
     private final String[] LANGUAGES = {
             "简体中文",
             "阿拉伯语（阿联酋）",
@@ -59,15 +55,6 @@ public class Home extends JFrame {
 
     public Home(){
         SwingUtilities.invokeLater(() -> {
-            try {
-                File f = new File("E:\\test.txt");
-                if (!f.exists()) {
-                    f.createNewFile();
-                }
-            } catch (IOException e) {
-
-            }
-
             this.setTitle("LOL外服语言切换工具");
             int width = 400, height = 300;
             this.setSize(width, height);
@@ -115,28 +102,34 @@ public class Home extends JFrame {
                                 .toURI())
                                 .getAbsolutePath();
                         StringBuilder temp = new StringBuilder();
-                        String temp_ = "";
+                        StringBuilder temp_ = new StringBuilder();
                         for (int i = 0;i < appPath.length();i++) {
-                            temp_ += appPath.charAt(i);
+                            temp_.append(appPath.charAt(i));
                             if (appPath.charAt(i) == '\\') {
-                                if (temp_.equals("lol2Chinese\\")) {
-                                    SettingController.enableAutoStart1(
+                                if (temp_.toString().equals("lol2Chinese\\")) {
+                                    SettingController.enableAutoStart(
                                             appName, temp + "\\lol2Chinese.exe");
                                     break;
                                 }
-                                if (temp_.equals("production\\")) {
+                                if (temp_.toString().equals("production\\")) {
+                                    // 编辑器直接运行不会生成exe，需要打包测试
                                     return;
                                 }
-                                temp_ = "";
+                                temp_ = new StringBuilder();
                             }
                             temp.append(appPath.charAt(i));
                         }
                     } catch (URISyntaxException ex) {
-                        logger.severe("error");
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "获取当前程序路径出错" + ex.getMessage(),
+                                "错误",
+                                JOptionPane.ERROR_MESSAGE
+                        );
                     }
                 } else {
                     props.setProperty("startup", "false");
-                    SettingController.disableAutoStart1(appName);
+                    SettingController.disableAutoStart(appName);
                 }
                 PropertiesConfig.save(props);
             });
@@ -145,12 +138,12 @@ public class Home extends JFrame {
             Hashtable<String, Object> config = propertiesConfig.getConfig();
             startup.setSelected((Boolean) config.get("startup"));
             isPBE.setSelected((Boolean) config.get("isPBE"));
-            languageController.changeLanguage(isPBE, nowLang, (String) config.get("lang"));
+            languageController.changeLanguage((String) config.get("lang"));
             nowLang.setText(languageController.currentLanguage());
             nowLang.setEditable(false);
 
             // Timer
-            languageController.changeTimer(isPBE);
+            languageController.changeTimer();
 
             // 布局
             GridBagConstraints gbc = new GridBagConstraints();
@@ -173,11 +166,6 @@ public class Home extends JFrame {
             gbc.gridy = 4;
             gbc.gridwidth = 2;
             JScrollPane scrollPane = new JScrollPane(OUTPUT);
-            OUTPUT.setEditable(false);
-            OUTPUT.setSize(new Dimension(200, 200));
-            OUTPUT.setLineWrap(true);
-            OUTPUT.setWrapStyleWord(true);
-
             panel.add(scrollPane, gbc);
 
             this.add(panel);
@@ -195,7 +183,7 @@ public class Home extends JFrame {
             String selectedOption = (String) comboBox.getSelectedItem();
             assert selectedOption != null;
             String langCode = languageController.languageCode(selectedOption);
-            languageController.changeLanguage(isPBE, nowLang, langCode);
+            languageController.changeLanguage(langCode);
             props.setProperty("lang", langCode);
             PropertiesConfig.save(props);
         });

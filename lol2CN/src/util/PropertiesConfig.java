@@ -1,9 +1,11 @@
 package util;
 
+import gui.Home;
+
+import javax.swing.*;
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 public class PropertiesConfig {
 
@@ -20,8 +22,6 @@ public class PropertiesConfig {
         config.put("lang", props.getProperty("lang"));
         this.config = config;
     }
-
-    private static final Logger logger = Logger.getLogger(PropertiesConfig.class.getName());
     private static final String CONFIG_DIR = ".\\conf\\";
     private static final String CONFIG_NAME = "config.properties";
 
@@ -37,19 +37,24 @@ public class PropertiesConfig {
                         props.setProperty("isPBE", "false");
                         props.setProperty("lang", "zh_CN");
                         save(props);
-                        logger.info("配置文件已创建");
+                        Home.OUTPUT.append("配置文件已创建");
                     } else {
-                        logger.info("配置文件创建失败");
+                        Home.OUTPUT.append("配置文件创建失败");
                     }
                 } else {
-                    logger.info("文件夹创建失败");
+                    Home.OUTPUT.append("文件加创建失败");
                 }
                 this.setConfig(getProps());
             } else {
                 this.setConfig(getProps());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
@@ -57,7 +62,12 @@ public class PropertiesConfig {
         try {
             props.load(new FileInputStream(CONFIG_DIR + CONFIG_NAME));
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         return props;
     }
@@ -67,7 +77,12 @@ public class PropertiesConfig {
         try {
             props.load(new FileInputStream(CONFIG_DIR + CONFIG_NAME));
         } catch (IOException e) {
-            e.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    null,
+                    e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
         return props;
     }
@@ -75,9 +90,14 @@ public class PropertiesConfig {
     public static void save(Properties props) {
         try (OutputStream output = new FileOutputStream(CONFIG_DIR + CONFIG_NAME)) {
             props.store(output, "Updated configuration");
-            logger.info("配置已保存。");
+            Home.OUTPUT.append("配置已保存");
         } catch (IOException e) {
-            logger.severe("无法保存配置文件: " + e.getMessage());
+            JOptionPane.showMessageDialog(
+                    null,
+                    "无法保存配置文件: " + e.getMessage(),
+                    "错误",
+                    JOptionPane.ERROR_MESSAGE
+            );
         }
     }
 
