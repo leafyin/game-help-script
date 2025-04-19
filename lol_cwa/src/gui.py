@@ -5,190 +5,11 @@ import sys
 import threading
 import time
 import tkinter as tk
-import pyaudio
-import numpy as np
 import keyboard
-import hashlib
-import random
-import requests
 
-from pathlib import Path
+from model import SpeechModel
+from utils import *
 from tkinter import ttk, filedialog, messagebox
-from modelscope import snapshot_download
-
-app_id = '20250321002311115'
-private_key = '2CIieDd6J1OvEWpSyoej'
-lang_name = {
-    "zh": "中文",
-    "cht": "繁体中文",
-    "yue": "粤语",
-    "wyw": "文言文",
-    "en": "英语",
-    "jp": "日语",
-    "kor": "韩语",
-    "fra": "法语",
-    "spa": "西班牙语",
-    "th": "泰语",
-    "ara": "阿拉伯语",
-    "ru": "俄语",
-    "pt": "葡萄牙语",
-    "de": "德语",
-    "it": "意大利语",
-    "el": "希腊语",
-    "nl": "荷兰语",
-    "pl": "波兰语",
-    "bul": "保加利亚语",
-    "est": "爱沙尼亚语",
-    "dan": "丹麦语",
-    "fin": "芬兰语",
-    "cs": "捷克语",
-    "rom": "罗马尼亚语",
-    "slo": "斯洛文尼亚语",
-    "swe": "瑞典语",
-    "hu": "匈牙利语",
-    "vie": "越南语"
-}
-
-lang_code = {
-    "中文": "zh",
-    "繁体中文": "cht",
-    "英语": "en",
-    "粤语": "yue",
-    "文言文": "wyw",
-    "日语": "jp",
-    "韩语": "kor",
-    "法语": "fra",
-    "西班牙语": "spa",
-    "泰语": "th",
-    "阿拉伯语": "ara",
-    "俄语": "ru",
-    "葡萄牙语": "pt",
-    "德语": "de",
-    "意大利语": "it",
-    "希腊语": "el",
-    "荷兰语": "nl",
-    "波兰语": "pl",
-    "保加利亚语": "bul",
-    "爱沙尼亚语": "est",
-    "丹麦语": "dan",
-    "芬兰语": "fin",
-    "捷克语": "cs",
-    "罗马尼亚语": "rom",
-    "斯洛文尼亚语": "slo",
-    "瑞典语": "swe",
-    "匈牙利语": "hu",
-    "越南语": "vie"
-}
-
-
-def model_download(path):
-    """
-    模型下载器
-    :param path: 路径
-    :return: ？？？
-    """
-    model_name = 'iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
-    for i in model_name.split('/'):
-        path += f'{i}\\'
-        Path(path).mkdir(exist_ok=True)
-    model_dir = snapshot_download(
-        model_id=model_name,
-        local_dir=path
-    )
-    return model_dir
-
-
-def sign(q, salt):
-    text = app_id + q + salt + private_key
-    md5_hash = hashlib.md5()
-    md5_hash.update(text.encode("utf-8"))
-    return md5_hash.hexdigest()
-
-
-def translate(text, src, to):
-    """
-    翻译
-    :param text: 原文
-    :param src: 原文语言
-    :param to: 译文语言
-    :return: 译文
-    """
-    salt = str(random.randint(10 ** 7, 10 ** 8 - 1))
-    url = 'https://fanyi-api.baidu.com/api/trans/vip/translate'
-
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-
-    data = {
-        "q": text,
-        "from": src,
-        "to": to,
-        "appid": app_id,
-        "salt": salt,
-        "sign": sign(text, salt)
-    }
-
-    try:
-        response = requests.post(url, data=data, headers=headers, timeout=10)
-        result = response.json()
-        return result['trans_result'][0]['dst']
-    except requests.exceptions.RequestException as e:
-        print("Request failed:", e)
-
-
-class SpeechModel:
-
-    def __init__(self, model_dir):
-        from funasr import AutoModel
-        # 加载实时流式语音识别模型
-        self.model = AutoModel(
-            model=model_dir,
-            model_revision="v2.0.4",
-            disable_update=True,
-        )
-
-    def audio_listener(self, callback):
-        # 配置音频流参数
-        chunk_size = [0, 10, 5]  # 600ms
-        encoder_chunk_look_back = 4
-        decoder_chunk_look_back = 1
-        cache = {}
-
-        # 初始化麦克风录音
-        p = pyaudio.PyAudio()
-        stream = p.open(format=pyaudio.paInt16,
-                        channels=1,
-                        rate=16000,
-                        input=True,
-                        frames_per_buffer=9600)  # 600ms 的音频块
-        try:
-            result = ''
-            count = 0
-            while True:
-                audio_chunk = stream.read(9600)  # 600ms
-                speech_chunk = np.frombuffer(audio_chunk, dtype=np.int16)
-                # 传递给模型进行实时识别
-                res = self.model.generate(input=speech_chunk, cache=cache, is_final=False,
-                                          chunk_size=chunk_size,
-                                          encoder_chunk_look_back=encoder_chunk_look_back,
-                                          decoder_chunk_look_back=decoder_chunk_look_back)
-                talk = res[0]['text']
-                if talk == '':
-                    count += 1
-                    if count == 5:  # 5 * 600ms 设定可能3秒后输出所说的话
-                        if len(result) != 0:
-                            callback(result)
-                            result = ''
-                        count = 0
-                else:
-                    result += talk
-        except Exception as e:
-            print(f"Error while reading audio: {e}")
-        finally:
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
 
 
 class RedirectText:
@@ -208,7 +29,6 @@ class RedirectText:
 def grid(component: tk.Widget, row, column, padx=5, pady=5, sticky='nsew', columnspan=None, rowspan=None):
     """
     表格布局
-    :return:
     """
     component.grid(
         row=row,
@@ -224,7 +44,7 @@ def grid(component: tk.Widget, row, column, padx=5, pady=5, sticky='nsew', colum
 class Config:
 
     def __init__(self):
-        self.config_path = '.\\config.json'
+        self.config_path = '../config.json'
 
     def save(self, json_data):
         with open(self.config_path, 'w') as f:
@@ -238,6 +58,10 @@ class Config:
 
 
 class AppGui:
+
+    def snapshot_translate(self):
+
+        pass
 
     def __init__(self):
         self.font = ("微软雅黑", 10)
@@ -273,7 +97,7 @@ class AppGui:
             speech_model = SpeechModel(model_dir + model_name)
             sys.stdout = RedirectText(log_text)
             sys.stderr = RedirectText(log_text)
-            Config().save(my_config)    # 保存配置
+            self.config.save(my_config)    # 保存配置
             threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
 
         # 启动按钮
@@ -316,7 +140,7 @@ class AppGui:
         def download_model():
             save_path = save_path_entry.get()
             if not save_path:
-                messagebox.showwarning("警告", "请选择保存位置！")
+                messagebox.showwarning("提示", "请选择保存位置！")
                 return
             model_download(save_path + '\\')
 
@@ -379,7 +203,7 @@ class AppGui:
         help_text.config(state='disabled')
         help_text.pack()
 
-        # 浮动窗口，让窗口始终保持在最前，50%透明、移除标题栏
+        # 浮动窗口，让窗口始终保持在最前，80%透明
         window = tk.Toplevel(root)
         window.attributes('-topmost', True)
         window.attributes('-alpha', 0.8)
@@ -399,7 +223,7 @@ class AppGui:
             if self.lang is None or self.lang == 'zh':   # 没选择语言则不翻译
                 translate_text.insert(0, data)
             else:
-                translate_text.insert(0, translate(data, 'zh', self.lang))
+                translate_text.insert(0, baidu_translate(data, 'zh', self.lang))
 
         def send(event):
             keyboard.send('enter')
