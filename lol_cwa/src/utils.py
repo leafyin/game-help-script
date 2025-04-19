@@ -70,6 +70,12 @@ lang_code = {
     "越南语": "vie"
 }
 
+lang_name_2 = {
+    "英语": "eng",
+    "日语": "jpn",
+    "韩语": "kor"
+}
+
 
 def sign(q, salt):
     text = app_id + q + salt + private_key
