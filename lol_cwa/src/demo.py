@@ -1,15 +1,15 @@
+# encoding=utf-8
 import re
 import threading
 import time
-from datetime import datetime
-
 import tkinter as tk
-from tkinter import ttk, messagebox
-
 import pytesseract
-from gui import grid
-from PIL import Image, ImageGrab
+
 from utils import *
+from gui import grid
+from datetime import datetime
+from tkinter import ttk, messagebox
+from PIL import Image, ImageGrab
 
 
 def snapshot(region):
@@ -36,6 +36,7 @@ class ImageTranslator:
 
         root = tk.Tk()
         root.title("实时识图翻译工具")
+        root.attributes('-topmost', True)
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
         width = 500
@@ -77,10 +78,11 @@ class ImageTranslator:
             if widget == translate_lang_combobox:
                 self.translate_lang = lang_code[widget.get()]
 
-        # 原始语言
+        # 识别的语言
         source_lang_label = tk.Label(frame, text="识别的语言：")
         grid(source_lang_label, 0, 0)
         source_lang_combobox = ttk.Combobox(frame, values=lang_list)
+        source_lang_combobox.set("选择")
         source_lang_combobox.config(state='readonly')
         source_lang_combobox.bind('<<ComboboxSelected>>', on_select)
         grid(source_lang_combobox, 0, 1)
@@ -89,6 +91,7 @@ class ImageTranslator:
         translate_lang_label = tk.Label(frame, text="翻译成的语言：")
         grid(translate_lang_label, 1, 0)
         translate_lang_combobox = ttk.Combobox(frame, values=lang_select_list)
+        translate_lang_combobox.set("选择")
         translate_lang_combobox.config(state='readonly')
         translate_lang_combobox.bind('<<ComboboxSelected>>', on_select)
         grid(translate_lang_combobox, 1, 1)
@@ -135,6 +138,7 @@ class ImageTranslator:
         right_y = info['y'] + info['height']
         print(f"窗口区域：{left_x}:{left_y}-{right_x}:{right_y}")
         self.region = (left_x, left_y, right_x, right_y)
+        # 关于游戏内容的正则
         pattern = r'^(?=.*\[.*\])(?=.*\(.*\))(?=.*:).+$'
         message_list = []
 
@@ -153,7 +157,7 @@ class ImageTranslator:
                     except IndexError:
                         return
                     print(msg)
-                    if msg[1] not in message_list:      # 内容匹配
+                    if msg[1] not in message_list and len(msg[1]) >= 1:      # 内容匹配
                         translated_text = baidu_translate(msg[1], source_lang_, self.translate_lang)
                         output.insert(tk.END, f"{msg[0]}：{translated_text}\n")
                         message_list.append(msg[1])
@@ -162,13 +166,14 @@ class ImageTranslator:
 
         def loop_snapshot2text(callback):
             if self.source_lang is None or self.translate_lang is None:
-                messagebox.showwarning("警告", "请选择识别语言和翻译语言！")
+                messagebox.showwarning("提示", "请选择识别语言和翻译语言！")
                 return
             else:
+                time.sleep(0.5)
                 window.iconify()
                 while True:
-                    filename = "..\\snapshot\\screen_20250420075644.png"
-                    # filename = snapshot(self.region)
+                    # filename = "..\\snapshot\\screen_20250420080423.png"
+                    filename = snapshot(self.region)
                     text = to_string(filename, self.source_lang)
                     callback(text)
                     time.sleep(3)

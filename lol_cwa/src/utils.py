@@ -111,6 +111,7 @@ def baidu_translate(text, src, to):
     try:
         response = requests.post(url, data=data, headers=headers, timeout=10)
         result = response.json()
+        print(result)
         return result['trans_result'][0]['dst']
     except requests.exceptions.RequestException as e:
         print("Request failed:", e)
