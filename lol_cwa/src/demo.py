@@ -1,21 +1,36 @@
 # encoding=utf-8
+import os
 import re
 import threading
 import time
-import tkinter as tk
 import pytesseract
 
+
 from utils import *
-from gui import grid
+from gui_utils import *
+from pathlib import Path
 from datetime import datetime
 from tkinter import ttk, messagebox
 from PIL import Image, ImageGrab
 
 
-def snapshot(region):
+# 打包时的参数
+# 当前目录路径
+# base_dir = os.path.dirname(os.path.abspath(__file__))
+#
+# # 设置 tesseract.exe 路径
+# tesseract_path = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
+# pytesseract.pytesseract.tesseract_cmd = tesseract_path
+#
+# # 设置 tessdata 路径
+# tessdata_dir = os.path.join(base_dir, 'tessdata')
+# os.environ['TESSDATA_PREFIX'] = tessdata_dir
+
+
+def snapshot(region, snapshot_path):
     formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
     screenshot = ImageGrab.grab(bbox=region)
-    filename = f"..\\snapshot\\screen_{formatted_time}.png"
+    filename = f"{snapshot_path}\\screen_{formatted_time}.png"
     screenshot.save(filename)
     return filename
 
@@ -33,6 +48,11 @@ class ImageTranslator:
         self.region = None
         self.source_lang = None
         self.translate_lang = None
+
+        # 初始化
+        self.snapshot_path = "snapshot"
+        folder_path = Path(self.snapshot_path)
+        folder_path.mkdir(exist_ok=True)
 
         root = tk.Tk()
         root.title("实时识图翻译工具")
@@ -173,8 +193,8 @@ class ImageTranslator:
                 window.iconify()
                 while True:
                     # filename = "..\\snapshot\\screen_20250420080423.png"
-                    filename = snapshot(self.region)
-                    text = to_string(filename, self.source_lang)
+                    filename = snapshot(self.region, self.snapshot_path)
+                    text = to_string(filename, f"chi_sim+{self.source_lang}")
                     callback(text)
                     time.sleep(3)
 

@@ -4,10 +4,10 @@ import os.path
 import sys
 import threading
 import time
-import tkinter as tk
 import keyboard
 
 from model import SpeechModel
+from gui_utils import *
 from utils import *
 from tkinter import ttk, filedialog, messagebox
 
@@ -24,21 +24,6 @@ class RedirectText:
 
     def flush(self):
         pass  # 必须定义 `flush()` 以兼容 `sys.stdout`
-
-
-def grid(component: tk.Widget, row, column, padx=5, pady=5, sticky='nsew', columnspan=None, rowspan=None):
-    """
-    表格布局
-    """
-    component.grid(
-        row=row,
-        column=column,
-        padx=padx,
-        pady=pady,
-        sticky=sticky,
-        rowspan=rowspan,
-        columnspan=columnspan,
-    )
 
 
 class Config:
