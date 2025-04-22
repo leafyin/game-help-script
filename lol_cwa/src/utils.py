@@ -1,9 +1,14 @@
 # encoding=utf-8
+import json
+import os.path
 import hashlib
 import random
-from pathlib import Path
-
 import requests
+import pytesseract
+
+from pathlib import Path
+from datetime import datetime
+from PIL import Image, ImageGrab
 from modelscope import snapshot_download
 
 app_id = '20250321002311115'
@@ -75,6 +80,36 @@ lang_name_2 = {
     "日语": "jpn",
     "韩语": "kor"
 }
+
+
+class Config:
+
+    def __init__(self):
+        self.config_path = '../config.json'
+
+    def save(self, json_data):
+        with open(self.config_path, 'w') as f:
+            json.dump(json_data, f, indent=4)
+
+    def load(self):
+        if not os.path.exists(self.config_path):
+            return None
+        with open(self.config_path, 'r') as f:
+            return json.load(f)
+
+
+def snapshot(region, snapshot_path):
+    formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
+    screenshot = ImageGrab.grab(bbox=region)
+    filename = f"{snapshot_path}\\screen_{formatted_time}.png"
+    screenshot.save(filename)
+    return filename
+
+
+def image_to_string(filename, lang):
+    image = Image.open(filename)
+    text = pytesseract.image_to_string(image, lang=lang)
+    return text
 
 
 def sign(q, salt):

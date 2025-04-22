@@ -1,49 +1,18 @@
 # encoding=utf-8
-import os
 import re
 import threading
 import time
-import pytesseract
-
 
 from utils import *
-from gui_utils import *
 from pathlib import Path
-from datetime import datetime
+from gui_utils import grid, tk
 from tkinter import ttk, messagebox
-from PIL import Image, ImageGrab
 
 
-# 打包时的参数
-# 当前目录路径
-# base_dir = os.path.dirname(os.path.abspath(__file__))
-#
-# # 设置 tesseract.exe 路径
-# tesseract_path = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
-# pytesseract.pytesseract.tesseract_cmd = tesseract_path
-#
-# # 设置 tessdata 路径
-# tessdata_dir = os.path.join(base_dir, 'tessdata')
-# os.environ['TESSDATA_PREFIX'] = tessdata_dir
+class ImageTranslator(tk.Frame):
 
-
-def snapshot(region, snapshot_path):
-    formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
-    screenshot = ImageGrab.grab(bbox=region)
-    filename = f"{snapshot_path}\\screen_{formatted_time}.png"
-    screenshot.save(filename)
-    return filename
-
-
-def to_string(filename, lang):
-    image = Image.open(filename)
-    text = pytesseract.image_to_string(image, lang=lang)
-    return text
-
-
-class ImageTranslator:
-
-    def __init__(self):
+    def __init__(self, master):
+        super().__init__(master=master)
         self.font = ("微软雅黑", 10)
         self.region = None
         self.source_lang = None
@@ -54,21 +23,18 @@ class ImageTranslator:
         folder_path = Path(self.snapshot_path)
         folder_path.mkdir(exist_ok=True)
 
-        root = tk.Tk()
-        root.title("实时识图翻译工具")
-        root.attributes('-topmost', True)
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
-        width = 500
-        height = 300
-
-        # 居中
-        x = (screen_width - width) // 2
-        y = (screen_height - height) // 2
-        root.geometry(f"{width}x{height}+{x}+{y}")
+        # 打包时的参数，本地调试可以注释
+        # 当前目录路径
+        # base_dir = os.path.dirname(os.path.abspath(__file__))
+        # # 设置 tesseract.exe 路径
+        # tesseract_path = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
+        # pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        # # 设置 tessdata 路径
+        # tessdata_dir = os.path.join(base_dir, 'tessdata')
+        # os.environ['TESSDATA_PREFIX'] = tessdata_dir
 
         # 选择区域
-        snapshot_zone = tk.Toplevel(root)
+        snapshot_zone = tk.Toplevel(master)
         snapshot_zone.title("选择区域")
         snapshot_zone.geometry("400x200")
         snapshot_zone.attributes('-topmost', True)
@@ -79,7 +45,7 @@ class ImageTranslator:
                  font=self.font
                  ).pack(padx=10, pady=50)
 
-        frame = tk.LabelFrame(root, text='设置', bd=2, relief="groove", padx=5, pady=10)
+        frame = tk.LabelFrame(master, text='设置', bd=2, relief="groove", padx=5, pady=10)
         frame.pack()
 
         # 下拉框数组
@@ -117,7 +83,7 @@ class ImageTranslator:
         grid(translate_lang_combobox, 1, 1)
 
         # 译文输出区域
-        translate_zone = tk.LabelFrame(root, text="译文区域", bd=2, relief="groove", padx=5, pady=10)
+        translate_zone = tk.LabelFrame(master, text="译文区域", bd=2, relief="groove", padx=5, pady=10)
         translate_zone.pack()
         translate_area = tk.Text(translate_zone, font=("微软雅黑", 12))
         scrollbar = tk.Scrollbar(translate_zone, command=translate_area.yview)
@@ -131,8 +97,6 @@ class ImageTranslator:
             command=lambda: self.set_region(snapshot_zone, translate_area)
         )
         grid(get_region_btn, 2, 0, columnspan=2)
-
-        root.mainloop()
 
     def set_region(self, window: tk.Toplevel, output: tk.Text):
         # 获取窗口位置 (相对于屏幕左上角)
@@ -192,9 +156,9 @@ class ImageTranslator:
                 time.sleep(0.5)
                 window.iconify()
                 while True:
-                    # filename = "..\\snapshot\\screen_20250420080423.png"
+                    # filename = "snapshot\\screen_20250420080423.png"
                     filename = snapshot(self.region, self.snapshot_path)
-                    text = to_string(filename, f"chi_sim+{self.source_lang}")
+                    text = image_to_string(filename, f"chi_sim+{self.source_lang}")
                     callback(text)
                     time.sleep(3)
 
@@ -202,5 +166,5 @@ class ImageTranslator:
 
 
 if __name__ == '__main__':
-    it = ImageTranslator()
-
+    # it = ImageTranslator()
+    pass
