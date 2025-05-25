@@ -1,6 +1,7 @@
 package controller;
 
 import gui.Home;
+import util.Debugger;
 import util.PropertiesConfig;
 
 import javax.swing.*;
@@ -53,6 +54,9 @@ public class LanguageController {
      * @param lang: 语言
      */
     public void changeLanguage(String lang) {
+        if (Debugger.DEBUG) {
+            return;
+        }
         String path = "", pathname, filename;
         if (Home.isPBE.isSelected()) {
             pathname = PBE_PATHNAME;
@@ -121,6 +125,9 @@ public class LanguageController {
      * @return 语言名称（中文）
      */
     public String currentLanguage() {
+        if (Debugger.DEBUG) {
+            return "";
+        }
         String line, languageStr, lang = "", pf;
         if ( (new File(PATHNAME + FILENAME)).exists() ) {
             pf = PATHNAME + FILENAME;

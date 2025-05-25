@@ -18,6 +18,8 @@ public class Home extends JFrame {
     public static JTextField nowLang;
     public static JCheckBox isPBE;
     public static JCheckBox startup;
+
+    private JTextArea helpTips;
     public static final JTextArea OUTPUT = new OutputArea(5, 10);
     private final String[] LANGUAGES = {
             "简体中文",
@@ -56,7 +58,7 @@ public class Home extends JFrame {
     public Home(){
         SwingUtilities.invokeLater(() -> {
             this.setTitle("LOL外服语言切换工具");
-            int width = 400, height = 300;
+            int width = 400, height = 400;
             this.setSize(width, height);
             this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
 
@@ -73,14 +75,22 @@ public class Home extends JFrame {
                     new JLabel("开机自启："),
                     new JLabel("PBE请勾选："),
                     new JLabel("当前客户端语言："),
-                    new JLabel("选择语言：")
+                    new JLabel("选择语言："),
+                    new JLabel("使用帮助：")
             };
             JComponent[] components = {
                     startup = new JCheckBox(),
                     isPBE = new JCheckBox(),
                     nowLang = new JTextField(),
-                    this.getStringJComboBox()
+                    this.getStringJComboBox(),
+                    helpTips = new JTextArea(5, 10)
             };
+
+            helpTips.setEditable(false);
+            helpTips.setSize(new Dimension(200, 200));
+            helpTips.setLineWrap(true);
+            helpTips.setWrapStyleWord(true);
+            helpTips.append("");
 
             isPBE.addActionListener(e -> {
                 if (isPBE.isSelected()) {
@@ -163,7 +173,7 @@ public class Home extends JFrame {
             }
 
             gbc.gridx = 0;
-            gbc.gridy = 4;
+            gbc.gridy = 5;
             gbc.gridwidth = 2;
             JScrollPane scrollPane = new JScrollPane(OUTPUT);
             panel.add(scrollPane, gbc);
