@@ -37,7 +37,7 @@ class SpeechTranslate(tk.Frame):
             speech_model = SpeechModel(model_dir + model_name)
             sys.stdout = RedirectText(log_text)
             sys.stderr = RedirectText(log_text)
-            self.config.save(my_config)    # 保存配置
+            # self.config.save(my_config)    # 保存配置
             threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
 
         # 启动按钮

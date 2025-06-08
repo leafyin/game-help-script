@@ -3,11 +3,16 @@ package gui;
 import controller.LanguageController;
 import controller.SettingController;
 import util.PropertiesConfig;
+import util.VersionControl;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Hashtable;
 import java.util.Properties;
 
@@ -66,12 +71,49 @@ public class Home extends JFrame {
             int y = screenSize.height / 2 - height / 2;
             this.setLocation(x, y);
 
-            // 组件
             JPanel panel = new JPanel();
             panel.setLayout(new GridBagLayout());
+
+            // 工具栏
+            JToolBar toolBar = new JToolBar();
+            toolBar.setBorderPainted(false);
+            JButton updateBtn = new JButton("检查更新");
+            updateBtn.addActionListener(e -> {
+                try {
+                    URL versionUrl = URI.create(VersionControl.VERSION_URL).toURL();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(versionUrl.openStream()));
+                    String latestVersion = in.readLine().trim();
+                    in.close();
+                    if (!VersionControl.CURRENT_VERSION.equals(latestVersion)) {
+                        int response = JOptionPane.showConfirmDialog(null,
+                                "发现新版本 " +
+                                        latestVersion +
+                                        " (当前版本 " + VersionControl.CURRENT_VERSION + ")\n" +
+                                        "是否要下载更新?（下载完成后请手动删除旧版本，并解压安装新版本）",
+                                "发现更新",
+                                JOptionPane.YES_NO_OPTION);
+
+                        if (response == JOptionPane.YES_OPTION) {
+                            URL downloadUrl = URI.create(VersionControl.DOWNLOAD_URL).toURL();
+                            in = new BufferedReader(new InputStreamReader(downloadUrl.openStream()));
+                            java.awt.Desktop.getDesktop().browse(new URI(in.readLine().trim()));
+                            in.close();
+                        }
+                    }
+                } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null,
+                                "无法检查更新: " + ex.getMessage(),
+                                "更新错误",
+                                JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            toolBar.add(updateBtn);
+            this.add(toolBar, BorderLayout.NORTH);
+
+            // 组件
             JLabel[] labels = {
                     new JLabel("开机自启："),
-                    new JLabel("PBE请勾选："),
+                    new JLabel("PBE（测试服）勾选："),
                     new JLabel("当前客户端语言："),
                     new JLabel("选择语言：")
             };
