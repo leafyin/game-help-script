@@ -35,13 +35,12 @@ public class LanguageController {
                 String localLang = languageCode(currentLanguage());
                 String configLang = PropertiesConfig.getProps(props).getProperty("lang");
                 if (!configLang.equals(localLang)) {
-                    Home.OUTPUT.append("Not same local：" + localLang + "===" + "config：" + configLang);
+                    Home.OUTPUT.append("检测到当前语言与配置不一致，切换" + configLang + "成功");
                     changeLanguage(configLang);
                 } else {
                     if (count >= timeout) {
                         ((Timer)e.getSource()).stop();
                     }
-                    Home.OUTPUT.append("Same local：" + localLang + "===" + "config：" + configLang);
                 }
             }
         });
@@ -73,9 +72,8 @@ public class LanguageController {
                 if (line.split(":")[0].trim().equals("locale")) {
                     languageStr = line.split(":")[1].trim();
                     language = languageStr.substring(1, languageStr.length() - 1);
-                    Home.OUTPUT.append("当前语言：" + language);
                     line = line.replace(language, lang);
-                    Home.OUTPUT.append("选择语言：" + line);
+                    Home.OUTPUT.append("切换语言：" + line + "成功");
                 }
                 writer.write(line);
                 writer.newLine();
