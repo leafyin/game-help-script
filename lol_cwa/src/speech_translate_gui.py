@@ -35,9 +35,7 @@ class SpeechTranslate(tk.Frame):
                 messagebox.showwarning("警告", "请选择模型存放位置！")
                 return
             speech_model = SpeechModel(model_dir + model_name)
-            sys.stdout = RedirectText(log_text)
-            sys.stderr = RedirectText(log_text)
-            # self.config.save(my_config)    # 保存配置
+            Config().save(my_config)    # 保存配置
             threading.Thread(target=speech_model.audio_listener, args=(process_data,), daemon=True).start()
 
         # 启动按钮
