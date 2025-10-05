@@ -69,11 +69,26 @@ public class LanguageController {
             BufferedWriter writer = new BufferedWriter(new FileWriter(path + filename));
             String line, languageStr, language;
             while ( (line = reader.readLine()) != null) {
+                // 添加zh_CN
+                if (lang.equals("zh_CN")) {
+                    if (line.equals("    - \"zh_TW\"")) {
+                        writer.write("    - \"zh_CN\"");
+                        writer.newLine();
+                    }
+                }
+                // 修改default_locale
+                if (line.split(":")[0].trim().equals("default_locale")) {
+                    languageStr = line.split(":")[1].trim();
+                    language = languageStr.substring(1, languageStr.length() - 1);
+                    line = line.replace(language, lang);
+                    Home.OUTPUT.append("更新 default_locale 成功" + lang);
+                }
+                // 修改locale
                 if (line.split(":")[0].trim().equals("locale")) {
                     languageStr = line.split(":")[1].trim();
                     language = languageStr.substring(1, languageStr.length() - 1);
                     line = line.replace(language, lang);
-                    Home.OUTPUT.append("切换语言：" + line + "成功");
+                    Home.OUTPUT.append("更新 local 成功" + lang);
                 }
                 writer.write(line);
                 writer.newLine();

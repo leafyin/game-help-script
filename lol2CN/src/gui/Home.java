@@ -185,7 +185,7 @@ public class Home extends JFrame {
             nowLang.setEditable(false);
 
             // Timer
-            languageController.changeTimer();
+            // languageController.changeTimer();
 
             // 布局
             GridBagConstraints gbc = new GridBagConstraints();

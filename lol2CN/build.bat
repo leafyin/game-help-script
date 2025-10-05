@@ -2,7 +2,7 @@
 
 chcp 65001
 
-set version=1.7
+set version=1.8
 
 @rem clean
 dir /b *.zip >nul 2>&1
@@ -27,6 +27,6 @@ jpackage --name lol2Chinese --input E:\game-help-script\lol2CN\src\out\target --
 @rem zip
 copy 常见问题.html lol2Chinese\
 tar -a -c -f "LOL外服语言切换工具.zip" "lol2Chinese"
-tar -a -c -f "LOL_LanguageChanger.zip" "lol2Chinese"
+tar -a -c -f "LOL_LanguageSelector.zip" "lol2Chinese"
 
 pause
