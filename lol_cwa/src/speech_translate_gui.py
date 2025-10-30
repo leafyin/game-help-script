@@ -12,7 +12,7 @@ from tkinter import ttk, filedialog, messagebox
 
 class SpeechTranslate(tk.Frame):
 
-    def __init__(self, master):
+    def __init__(self, root, master):
         super().__init__(master)
         self.font = ("微软雅黑", 10)
         self.entry_font = ("微软雅黑", 20)
@@ -26,6 +26,12 @@ class SpeechTranslate(tk.Frame):
             my_config = self.config
 
         self.lang = None
+
+        # 状态变量
+        self.onoff_ = True
+        self.thread = None
+        self.is_listening = False
+        self.bound_key = None
 
         def onoff():
             # 启用音频监听
@@ -41,6 +47,53 @@ class SpeechTranslate(tk.Frame):
         # 启动按钮
         onoff_btn = tk.Button(master, text='启动', command=onoff)
         onoff_btn.pack()
+
+        def start_listening():
+            self.is_listening = True
+            translate_switch_btn.config(text="监听中...", bg="orange")
+
+        def stop_listening():
+            self.is_listening = False
+            translate_switch_btn.config(
+                text=f"监听完成，绑定键位为：{self.bound_key}，再次点击可重新绑定",
+                bg="orange"
+            )
+
+        def on_key_press(event):
+            if self.is_listening:
+                # 获取按下的键
+                key = event.keysym
+                self.bound_key = key
+                translate_switch_btn.config(text=f"当前绑定键: {key}")
+                root.bind(f'<KeyPress-{key}>', on_bound_key_pressed)
+                stop_listening()
+
+        def on_bound_key_pressed(event):
+            if self.onoff_:
+                self.onoff_ = False
+                model_name = '\\iic\\speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
+                model_dir = save_path_entry.get()
+                if not model_dir:
+                    messagebox.showwarning("警告", "请选择模型存放位置！")
+                    return
+                speech_model = SpeechModel(model_dir + model_name)
+                Config().save(my_config)  # 保存配置
+                self.thread = threading.Thread(
+                    target=speech_model.audio_listener,
+                    args=(process_data,),
+                    daemon=True
+                )
+                self.thread.start()
+            else:
+                self.onoff_ = True
+                self.thread.stop()
+
+        # 翻译功能开关
+        translate_switch_btn = tk.Button(master, text='翻译开关（单击可绑定按键）', command=start_listening)
+        translate_switch_btn.pack()
+
+        # 全局键盘事件
+        root.bind('<KeyPress>', on_key_press)
 
         # frame
         frame = tk.LabelFrame(master, text='配置', bd=2, relief="groove", padx=5, pady=10)

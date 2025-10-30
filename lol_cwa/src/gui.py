@@ -25,7 +25,7 @@ class GUI(tk.Tk):
         notebook.pack(fill='both', expand=True)
 
         frame_box = tk.Frame(self)
-        SpeechTranslate(frame_box)
+        SpeechTranslate(self, frame_box)
         frame_box.pack()
 
         frame_box2 = tk.Frame(self)

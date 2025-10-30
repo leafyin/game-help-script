@@ -180,7 +180,8 @@ public class Home extends JFrame {
             Hashtable<String, Object> config = propertiesConfig.getConfig();
             startup.setSelected((Boolean) config.get("startup"));
             isPBE.setSelected((Boolean) config.get("isPBE"));
-            languageController.changeLanguage((String) config.get("lang"));
+            
+            //languageController.changeLanguage((String) config.get("lang"));
             nowLang.setText(languageController.currentLanguage());
             nowLang.setEditable(false);
 
