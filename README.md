@@ -53,7 +53,7 @@
 ### 注意事项
 * Windows用户不必在意
 * MAC用户请打开Terminal执行`open /Applications/League\ of\ Legends.app --args --locale=zh_CN`这个命令就可以打开游戏并汉化
-可以每次都使用该方法进行启动游戏
+* 也可以下载该快捷指令https://www.icloud.com/shortcuts/883b5848b84b4e7089beb903d05af3df可以每次都使用该方法进行启动游戏
 
 ### 支持切换的语言
 * 简体中文 
