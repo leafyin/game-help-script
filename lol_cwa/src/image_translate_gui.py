@@ -5,7 +5,6 @@ import time
 
 from utils import *
 from pathlib import Path
-from gui_utils import grid, tk
 from tkinter import ttk, messagebox
 
 

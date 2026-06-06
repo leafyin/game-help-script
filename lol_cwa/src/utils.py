@@ -5,6 +5,7 @@ import hashlib
 import random
 import requests
 import pytesseract
+import tkinter as tk
 
 from pathlib import Path
 from datetime import datetime
@@ -43,6 +44,12 @@ lang_name = {
     "hu": "匈牙利语",
     "vie": "越南语"
 }
+
+def lang_names():
+    lang_names = []
+    for v in lang_name.values():
+        lang_names.append(v)
+    return lang_names
 
 lang_code = {
     "中文": "zh",
@@ -156,15 +163,28 @@ def model_download(path):
     """
     模型下载
     :param path: 路径
-    :return: ？？？
     """
     model_name = 'iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
     for i in model_name.split('/'):
         path += f'{i}\\'
         Path(path).mkdir(exist_ok=True)
-    model_dir = snapshot_download(
+    snapshot_download(
         model_id=model_name,
         local_dir=path
     )
-    return model_dir
+
+
+def grid(component: tk.Widget, row, column, padx=5, pady=5, sticky='nsew', columnspan=None, rowspan=None):
+    """
+    表格布局
+    """
+    component.grid(
+        row=row,
+        column=column,
+        padx=padx,
+        pady=pady,
+        sticky=sticky,
+        rowspan=rowspan,
+        columnspan=columnspan,
+    )
 

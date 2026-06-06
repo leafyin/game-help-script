@@ -1,9 +1,8 @@
 # encoding=utf-8
-from gui_utils import tk
 from tkinter import ttk
 
 from image_translate_gui import ImageTranslator
-from speech_translate_gui import SpeechTranslate
+from speech_translate_gui import SpeechTranslate, tk
 
 
 class GUI(tk.Tk):
@@ -14,8 +13,8 @@ class GUI(tk.Tk):
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
-        height = 500
-        width = 400
+        height = 600
+        width = 600
         x = (screen_width - width) // 2
         y = (screen_height - height) // 2
         self.geometry(f"{width}x{height}+{x}+{y}")
