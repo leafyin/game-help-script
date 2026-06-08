@@ -27,10 +27,10 @@ class SpeechTranslate(tk.Frame):
             }
         
         self.speech_model = None
-        self.model_name = 'iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
+        self.model_name = 'iic\\speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
         model_dir = self.config['model_saved_path']
         if model_dir is not None:
-            self.speech_model = SpeechModel(f"{model_dir}/{self.model_name}")
+            self.speech_model = SpeechModel(f"{model_dir}\\{self.model_name}")
         
         # 线程控制事件
         self.stop_event = threading.Event()
@@ -149,7 +149,7 @@ class SpeechTranslate(tk.Frame):
         if not save_path:
             messagebox.showwarning("提示", "请选择保存位置！")
             return
-        threading.Thread(target=model_download, args=(f"{save_path}/",), daemon=True).start()
+        threading.Thread(target=model_download, args=(f"{save_path}\\",), daemon=True).start()
 
 
     def select_save_path(self):
@@ -179,7 +179,7 @@ class SpeechTranslate(tk.Frame):
             messagebox.showwarning("警告", "请选择翻译语言！")
             return
         if self.config['model_saved_path'] is not None and self.speech_model is None:
-            self.speech_model = SpeechModel(f"{model_dir}/{self.model_name}")
+            self.speech_model = SpeechModel(f"{model_dir}\\{self.model_name}")
         else:
             self.is_audio_listening = threading.Thread(
                 target=self.speech_model.audio_listener, 
