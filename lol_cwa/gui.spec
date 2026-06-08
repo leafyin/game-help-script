@@ -1,6 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-from PyInstaller.utils.hooks import collect_submodules, Tree
+from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.building.datastruct import Tree
+
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 src_root = os.path.join(project_root, 'src')
