@@ -1,10 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import sys
 from PyInstaller.utils.hooks import collect_submodules
 from PyInstaller.building.datastruct import Tree
 
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+spec_file = os.path.abspath(sys.argv[0])
+project_root = os.path.abspath(os.path.join(os.path.dirname(spec_file), '..'))
 src_root = os.path.join(project_root, 'src')
 
 hiddenimports = []
