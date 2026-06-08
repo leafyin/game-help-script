@@ -24,13 +24,13 @@ class ImageTranslator(tk.Frame):
 
         # 打包时的参数，本地调试可以注释
         # 当前目录路径
-        # base_dir = os.path.dirname(os.path.abspath(__file__))
-        # # 设置 tesseract.exe 路径
-        # tesseract_path = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
-        # pytesseract.pytesseract.tesseract_cmd = tesseract_path
-        # # 设置 tessdata 路径
-        # tessdata_dir = os.path.join(base_dir, 'tessdata')
-        # os.environ['TESSDATA_PREFIX'] = tessdata_dir
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        # 设置 tesseract.exe 路径
+        tesseract_path = os.path.join(base_dir, 'Tesseract-OCR', 'tesseract.exe')
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        # 设置 tessdata 路径
+        tessdata_dir = os.path.join(base_dir, 'tessdata')
+        os.environ['TESSDATA_PREFIX'] = tessdata_dir
 
         # 选择区域
         snapshot_zone = tk.Toplevel(master)
