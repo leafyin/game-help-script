@@ -18,23 +18,35 @@ class SpeechTranslate(tk.Frame):
         self.entry_font = ("微软雅黑", 20)
 
         # 初始化用户配置
+        self.lang = None
         self.config = Config().load()
         if self.config is None:
             self.config = {
                 'model_saved_path': None,
                 'lang': None
             }
-        self.lang = None
+        
+        self.speech_model = None
+        self.model_name = 'iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
+        model_dir = self.config['model_saved_path']
+        if model_dir is not None:
+            self.speech_model = SpeechModel(f"{model_dir}/{self.model_name}")
+        
+        # 线程控制事件
+        self.stop_event = threading.Event()
+        self.is_audio_listening = False
 
-        # 状态变量
-        self.onoff_ = True
-        self.thread = None
-        self.is_listening = False
-        self.bound_key = None
+        # 顶部frame
+        top_frame = tk.LabelFrame(master, text='操作', bd=2, relief="groove", padx=5, pady=10)
+        top_frame.pack()
 
         # 启动按钮
-        self.onoff_btn = tk.Button(master, text='启动', command=self.onoff)
-        self.onoff_btn.pack()
+        self.start_btn = tk.Button(top_frame, text='启动', command=self.start)
+        grid(self.start_btn, row=0, column=0)
+
+        # 监听按键按钮
+        self.key_listen_btn = tk.Button(top_frame, text='点击绑定按键', command=self.bind_key_listener)
+        grid(self.key_listen_btn, row=1, column=0)
 
         # 配置frame
         frame = tk.LabelFrame(master, text='配置', bd=2, relief="groove", padx=5, pady=10)
@@ -69,9 +81,11 @@ class SpeechTranslate(tk.Frame):
         frame2 = tk.LabelFrame(master, text='控制台输出', bd=2, relief="groove", padx=5, pady=10)
         frame2.pack()
 
-        # 控制台输出
+        # 将控制台的错误和print输出重定向到GUI的文本框中
         self.log_text = tk.Text(frame2, height=10, width=55)
         self.log_text.pack()
+        # sys.stdout = RedirectText(self.log_text)
+        # sys.stderr = RedirectText(self.log_text)
 
         # frame3
         frame3 = tk.LabelFrame(master, text='使用帮助', bd=2, relief="groove", padx=5, pady=10)
@@ -100,6 +114,24 @@ class SpeechTranslate(tk.Frame):
         keyboard.on_press_key('enter', send)
 
 
+    def bind_key_listener(self):
+        self.master.bind_all('<Key>', self.on_key_press)
+        self.key_listen_btn.config(text='正在监听按键...')
+        self.master.focus_set()
+
+    def on_key_press(self, event):
+        key = event.keysym
+        print(f"按下键: {key} ({event.keycode})")
+        self.key_listen_btn.config(text=f'已绑定到按键: {key}')
+        self.master.unbind_all('<Key>')
+        # 给已经绑定的按键添加事件
+        self.master.bind_all(f'<KeyPress-{key}>', self.binded_key_pressed)
+
+    def binded_key_pressed(self, event):
+        self.stop_event.set()  # 停止之前的监听线程
+        self.is_audio_listening.join(timeout=2)  # 等待线程结束，避免资源冲突
+        self.stop_event.clear()  # 重置事件状态，为下一次监听做准备    
+
     def lang_slector(self, event):
         """
         语言选择
@@ -113,13 +145,11 @@ class SpeechTranslate(tk.Frame):
         '''
         下载模型，下载进度在控制台输出
         '''
-        sys.stdout = RedirectText(self.log_text)
-        sys.stderr = RedirectText(self.log_text)
         save_path = self.save_path_entry.get()
         if not save_path:
             messagebox.showwarning("提示", "请选择保存位置！")
             return
-        model_download(save_path + '\\')
+        threading.Thread(target=model_download, args=(f"{save_path}/",), daemon=True).start()
 
 
     def select_save_path(self):
@@ -139,15 +169,23 @@ class SpeechTranslate(tk.Frame):
         self.save_path_entry.config(state='readonly')
 
 
-    def onoff(self):
+    def start(self):
         # 启用音频监听
-        model_name = '\\iic\\speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
         model_dir = self.save_path_entry.get()
         if not model_dir:
             messagebox.showwarning("警告", "请选择模型存放位置！")
             return
-        speech_model = SpeechModel(model_dir + model_name)
-        threading.Thread(target=speech_model.audio_listener, args=(self.process_data,), daemon=True).start()
+        if self.combobox.get() == '请选择要翻译成什么语言':
+            messagebox.showwarning("警告", "请选择翻译语言！")
+            return
+        if self.config['model_saved_path'] is not None and self.speech_model is None:
+            self.speech_model = SpeechModel(f"{model_dir}/{self.model_name}")
+        else:
+            self.is_audio_listening = threading.Thread(
+                target=self.speech_model.audio_listener, 
+                args=(self.stop_event, self.process_data), 
+                daemon=True)
+            self.is_audio_listening.start()
 
 
     def process_data(self, data):
@@ -170,9 +208,9 @@ class SpeechTranslate(tk.Frame):
         help_text.insert(
             1.0,
             '1.第一次使用请选择模型保存路径，点击下载，下载进度在控制台输出，下载完成后控制台停止输出\n'
-            '2.选择需要翻译的语言，支持（英语、韩语、日语、俄语）翻译\n'
+            '2.选择需要翻译的语言，支持多种语言翻译\n'
             '3.上述操作完成之后点击启动，会等待数秒，启动后控制台会持续输出，此时麦克风音频已经开始监听，开始说话即可\n'
-            '4.如果已经下载好模型，请直接选择模型保存路径，一般是根目录，iic目录的上一级目录，再选择翻译的语言，点击启动\n'
+            '4.第一次使用后会将模型目录、上次选择的语言记录在配置文件中，非第一次进入后无需重新选择\n'
         )
         help_text.config(state='disabled')
         help_text.pack()
@@ -190,7 +228,7 @@ class SpeechModel:
         )
 
 
-    def audio_listener(self, callback):
+    def audio_listener(self, stop_event, callback=None):
         # 配置音频流参数
         chunk_size = [0, 10, 5]  # 600ms
         encoder_chunk_look_back = 4
@@ -207,7 +245,7 @@ class SpeechModel:
         try:
             result = ''
             count = 0
-            while True:
+            while not stop_event.is_set():
                 audio_chunk = stream.read(9600)  # 600ms
                 speech_chunk = np.frombuffer(audio_chunk, dtype=np.int16)
                 # 传递给模型进行实时识别
@@ -249,4 +287,5 @@ class RedirectText:
 
 
 if __name__ == '__main__':
-    pass
+    sm = SpeechModel('~/models/iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online')
+    sm.audio_listener()

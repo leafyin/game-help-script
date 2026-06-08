@@ -166,8 +166,8 @@ def model_download(path):
     """
     model_name = 'iic/speech_paraformer-large_asr_nat-zh-cn-16k-common-vocab8404-online'
     for i in model_name.split('/'):
-        path += f'{i}\\'
-        Path(path).mkdir(exist_ok=True)
+        path += f'{i}/'
+        Path(path).mkdir(parents=True, exist_ok=True)
     snapshot_download(
         model_id=model_name,
         local_dir=path
@@ -188,3 +188,6 @@ def grid(component: tk.Widget, row, column, padx=5, pady=5, sticky='nsew', colum
         columnspan=columnspan,
     )
 
+if __name__ == '__main__':
+    # model_download('')
+    pass

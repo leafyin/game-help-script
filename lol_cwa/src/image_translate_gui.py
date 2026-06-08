@@ -121,8 +121,6 @@ class ImageTranslator(tk.Frame):
         right_y = info['y'] + info['height']
         print(f"窗口区域：{left_x}:{left_y}-{right_x}:{right_y}")
         self.region = (left_x, left_y, right_x, right_y)
-        # 关于游戏内容的正则
-        pattern = r'^(?=.*\[.*\])(?=.*\(.*\))(?=.*:).+$'
         message_list = []
 
         def process_data(data: str):
@@ -133,19 +131,14 @@ class ImageTranslator(tk.Frame):
                 source_lang_ = "jp"
             if self.source_lang == "kor":
                 source_lang_ = "kor"
-            for t in data.split("\n"):
-                if re.match(pattern, t):                # 正则匹配
-                    try:
-                        msg = t.split(":")
-                    except IndexError:
-                        return
-                    print(msg)
-                    if msg[1] not in message_list and len(msg[1]) >= 1:      # 内容匹配
-                        translated_text = baidu_translate(msg[1], source_lang_, self.translate_lang)
-                        output.insert(tk.END, f"{msg[0]}：{translated_text}\n")
-                        message_list.append(msg[1])
-                        output.see(tk.END)
-                        time.sleep(1.5)
+            for msg in data.split("\n"):
+                print(msg)
+                if msg[1] not in message_list and len(msg[1]) >= 1:
+                    translated_text = baidu_translate(msg[1], source_lang_, self.translate_lang)
+                    output.insert(tk.END, f"{msg[0]}：{translated_text}\n")
+                    message_list.append(msg[1])
+                    output.see(tk.END)
+                    time.sleep(1.5)
 
         def loop_snapshot2text(callback):
             if self.source_lang is None or self.translate_lang is None:
@@ -155,8 +148,8 @@ class ImageTranslator(tk.Frame):
                 time.sleep(0.5)
                 window.iconify()
                 while True:
-                    # filename = "snapshot\\screen_20250420080423.png"
-                    filename = snapshot(self.region, self.snapshot_path)
+                    filename = "snapshot/image.png"
+                    # filename = snapshot(self.region, self.snapshot_path)
                     text = image_to_string(filename, f"chi_sim+{self.source_lang}")
                     callback(text)
                     time.sleep(3)
