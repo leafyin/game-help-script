@@ -6,7 +6,7 @@ from PyInstaller.building.datastruct import Tree
 
 
 spec_file = os.path.abspath(sys.argv[0])
-project_root = os.path.abspath(os.path.join(os.path.dirname(spec_file), '..'))
+project_root = os.path.abspath(os.path.dirname(spec_file))
 src_root = os.path.join(project_root, 'src')
 
 hiddenimports = []
