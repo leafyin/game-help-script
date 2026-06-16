@@ -40,6 +40,9 @@ class SpeechTranslateView(tk.Frame):
         self.start_btn = tk.Button(top_frame, text='启动', command=self._start)
         grid(self.start_btn, row=0, column=0)
 
+        self.toggle_window_btn = tk.Button(top_frame, text='隐藏窗口', command=self._toggle_float_window)
+        grid(self.toggle_window_btn, row=0, column=1)
+
         self.key_listen_btn = tk.Button(top_frame, text='点击绑定按键', command=self._bind_key_listener)
         grid(self.key_listen_btn, row=1, column=0)
 
@@ -77,7 +80,7 @@ class SpeechTranslateView(tk.Frame):
         # ---------- 使用帮助 ----------
         help_frame = tk.LabelFrame(master, text='使用帮助', bd=2, relief="groove", padx=5, pady=10)
         help_frame.pack()
-        help_text = tk.Text(help_frame, height=20, width=55)
+        help_text = tk.Text(help_frame, height=12, width=55)
         help_text.insert(
             1.0,
             '1. 第一次使用请选择模型保存路径，点击下载，下载进度在控制台输出\n'
@@ -111,6 +114,15 @@ class SpeechTranslateView(tk.Frame):
     # ---------------------------------------------------------------
     # 按钮回调
     # ---------------------------------------------------------------
+    def _toggle_float_window(self):
+        """切换浮动翻译窗口的显示/隐藏"""
+        if self._float_window.state() == 'normal':
+            self._float_window.withdraw()
+            self.toggle_window_btn.config(text='显示窗口')
+        else:
+            self._float_window.deiconify()
+            self.toggle_window_btn.config(text='隐藏窗口')
+
     def _start(self):
         """启动语音监听"""
         model_dir = self.save_path_entry.get()

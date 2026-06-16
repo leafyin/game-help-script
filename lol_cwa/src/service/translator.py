@@ -163,7 +163,7 @@ def baidu_translate(text: str, src: str, to: str) -> str | None:
     try:
         response = requests.post(url, data=data, headers=headers, timeout=10)
         result = response.json()
-        print(f"[百度翻译] {text[:40]} -> {result}")
+        # print(f"[百度翻译] {text[:40]} -> {result}")
         return result['trans_result'][0]['dst']
     except (requests.exceptions.RequestException, KeyError) as e:
         print(f"[百度翻译失败] {e}")
@@ -193,25 +193,3 @@ def translate_text(text: str, source_lang: str, target_lang: str) -> str:
     if translated:
         _set_cache(text, src, target_lang, translated)
     return translated or ""
-
-
-def translate_lines(text: str, source_lang: str, target_lang: str, delay: float = 6.0) -> str:
-    """
-    逐行翻译多行文本（每行之间带延时，避免触发频率限制）
-    :param text:         多行原文
-    :param source_lang:  Tesseract 语言代码
-    :param target_lang:  百度翻译目标语言代码
-    :param delay:        每行之间的延时（秒）
-    :return: 逐行翻译后拼接的文本
-    """
-    lines = text.split('\n')
-    translated_lines = []
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        translated = translate_text(line, source_lang, target_lang)
-        print(f"[翻译] {line[:40]} -> {translated[:40] if translated else ''}")
-        translated_lines.append(translated)
-        time.sleep(delay)
-    return '\n'.join(translated_lines)

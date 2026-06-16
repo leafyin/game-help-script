@@ -6,7 +6,6 @@
 
 import os
 
-from datetime import datetime
 from PIL import ImageGrab
 
 
@@ -18,8 +17,7 @@ def snapshot(region: tuple, snapshot_path: str) -> str:
     :return: 保存的图片文件路径
     """
     os.makedirs(snapshot_path, exist_ok=True)
-    formatted_time = datetime.now().strftime("%Y%m%d%H%M%S")
     screenshot = ImageGrab.grab(bbox=region)
-    filename = os.path.join(snapshot_path, f"screen_{formatted_time}.png")
+    filename = os.path.join(snapshot_path, f"screenshot.png")
     screenshot.save(filename)
     return filename

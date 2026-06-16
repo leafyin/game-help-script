@@ -6,11 +6,13 @@
 
 import os
 import sys
+import time
 import threading
 import tkinter as tk
+import difflib
 
 from tkinter import ttk, messagebox
-from service.translator import LANG_NAME, LANG_CODE, LANG_NAME_2, translate_lines
+from service.translator import LANG_NAME, LANG_CODE, LANG_NAME_2, translate_text
 from service.ocr import ocr_image
 from service.image_capture import snapshot
 from utils import grid
@@ -105,12 +107,6 @@ class ImageTranslateView(tk.Frame):
         btn_frame = tk.Frame(frame)
         btn_frame.grid(row=2, column=0, columnspan=2, pady=10)
 
-        self.start_btn = tk.Button(btn_frame, text="开始翻译", command=self._start)
-        self.start_btn.pack(side=tk.LEFT, padx=5)
-
-        self.stop_btn = tk.Button(btn_frame, text="停止", command=self._stop, state=tk.DISABLED)
-        self.stop_btn.pack(side=tk.LEFT, padx=5)
-
     # ---------------------------------------------------------------
     # 按钮回调
     # ---------------------------------------------------------------
@@ -145,11 +141,21 @@ class ImageTranslateView(tk.Frame):
         self.stop_btn.config(state=tk.DISABLED)
         self.output_text.insert(tk.END, "\n[已停止]\n")
 
+    
+    def _is_duplicate(self, text: str, cache: set) -> bool:
+        """模糊判断 text 是否和 cache 中已有内容相似（相似度 > 85% 视为重复）"""
+        for existing in cache:
+            ratio = difflib.SequenceMatcher(None, text, existing).ratio()
+            if ratio > 0.85:
+                return True
+        return False
+
     # ---------------------------------------------------------------
     # 后台循环（截图 → OCR → 翻译 → 显示）
     # ---------------------------------------------------------------
     def _loop(self):
-        """后台线程：截图 → OCR → 翻译 → 显示"""
+        """后台线程：截图 → OCR → 翻译 → 显示（相似内容跳过不输出）"""
+        output_cache = set()  # 已输出的译文集合（用于模糊去重）
         while not self._stop_event.is_set():
             # 1. 截图
             filename = snapshot(self.region, self.snapshot_path)
@@ -160,20 +166,29 @@ class ImageTranslateView(tk.Frame):
                 self._cleanup_file(filename)
                 continue
 
-            # 3. 翻译
-            translated = translate_lines(text, self.source_lang, self.translate_lang, delay=6)
+            lines = text.split('\n')
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
 
-            # 4. 显示
-            if translated:
-                self.output_text.insert(tk.END, f"{translated}\n")
-                self.output_text.see(tk.END)
+                # 3. 翻译
+                translated = translate_text(line, self.source_lang, self.translate_lang)
+                if not translated:
+                    continue
 
-            self._cleanup_file(filename)
+                # 4. 模糊去重：和已输出内容相似度 > 85% 则跳过
+                normalized = translated.strip().lower()
+                if self._is_duplicate(normalized, output_cache):
+                    print(f"[跳过相似] {translated[:40]}")
+                else:
+                    print(f"[翻译] {translated[:40]}")
+                    output_cache.add(normalized)
+                    self.after(0, lambda t=translated: self._append_output(t))
 
-    @staticmethod
-    def _cleanup_file(filepath: str):
-        """删除临时截图文件"""
-        try:
-            os.remove(filepath)
-        except Exception:
-            pass
+                time.sleep(1.0)
+
+    def _append_output(self, text: str):
+        """追加译文到输出框（主线程安全）"""
+        self.output_text.insert(tk.END, f"{text}\n")
+        self.output_text.see(tk.END)
