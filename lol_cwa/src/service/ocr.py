@@ -17,7 +17,7 @@ def ocr_image(image_path: str, source_lang: str = "eng") -> str:
     :param source_lang: Tesseract 语言代码（eng/jpn/kor）
     :return: 识别出的文本，失败返回空字符串
     """
-    image_path = '/Users/yinye/code/game-help-script/lol_cwa/snapshot/screen_20260611000257.png'
+    # image_path = '/Users/yinye/code/game-help-script/lol_cwa/snapshot/screen_20260611000257.png'
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"图片文件不存在: {image_path}")
 
