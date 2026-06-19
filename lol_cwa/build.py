@@ -87,6 +87,7 @@ def get_hidden_imports(image_only: bool) -> list:
         'requests',
         'hashlib',
         'random',
+        'keyboard',
     ]
     if not image_only:
         imports += [
@@ -94,7 +95,6 @@ def get_hidden_imports(image_only: bool) -> list:
             'funasr',
             'numpy',
             'pyaudio',
-            'keyboard',
         ]
     return imports
 

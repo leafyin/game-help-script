@@ -30,14 +30,14 @@ class MainWindow(tk.Tk):
         notebook = ttk.Notebook(self)
         notebook.pack(fill='both', expand=True)
 
-        # Tab 1: 语音识别翻译
-        speech_frame = tk.Frame(self)
-        SpeechTranslateView(speech_frame)
-        speech_frame.pack()
-        notebook.add(speech_frame, text='语音识别翻译')
-
-        # Tab 2: 划区识图翻译
+        # Tab 1: 划区识图翻译
         image_frame = tk.Frame(self)
         ImageTranslateView(image_frame)
         image_frame.pack()
         notebook.add(image_frame, text='划区识图翻译')
+
+        # Tab 2: 语音识别翻译
+        speech_frame = tk.Frame(self)
+        SpeechTranslateView(speech_frame)
+        speech_frame.pack()
+        notebook.add(speech_frame, text='语音识别翻译')
