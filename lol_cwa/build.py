@@ -134,8 +134,8 @@ def build(image_only: bool):
         py, '-m', 'PyInstaller',
         '--clean',
         '--noconfirm',
-        '--onefile',                    # 单个 exe
-        '--windowed',                   # 无控制台窗口（GUI 模式）
+        # '--onefile',                    # 单个 exe
+        # '--windowed',                   # 无控制台窗口（GUI 模式）
         '--name', '火花工具箱',
         '--distpath', DIST_DIR,
         '--workpath', BUILD_DIR,
